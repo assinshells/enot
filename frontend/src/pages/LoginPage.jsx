@@ -54,14 +54,12 @@ const LoginPage = () => {
 
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">
-                  <label htmlFor="login" className="form-label">
-                    Никнейм или Email
-                  </label>
                   <input
                     type="text"
                     className="form-control"
                     id="login"
                     name="login"
+                    placeholder='Никнейм или Email'
                     value={formData.login}
                     onChange={handleChange}
                     required
@@ -69,14 +67,12 @@ const LoginPage = () => {
                 </div>
 
                 <div className="mb-3">
-                  <label htmlFor="password" className="form-label">
-                    Пароль
-                  </label>
                   <input
                     type="password"
                     className="form-control"
                     id="password"
                     name="password"
+                    placeholder='пароль'
                     value={formData.password}
                     onChange={handleChange}
                     required

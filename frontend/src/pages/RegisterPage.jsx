@@ -55,14 +55,12 @@ const RegisterPage = () => {
 
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">
-                  <label htmlFor="nickname" className="form-label">
-                    Никнейм *
-                  </label>
                   <input
                     type="text"
                     className="form-control"
                     id="nickname"
                     name="nickname"
+                    placeholder='Никнейм'
                     value={formData.nickname}
                     onChange={handleChange}
                     required
@@ -72,14 +70,12 @@ const RegisterPage = () => {
                 </div>
 
                 <div className="mb-3">
-                  <label htmlFor="email" className="form-label">
-                    Email (опционально)
-                  </label>
                   <input
                     type="email"
                     className="form-control"
                     id="email"
                     name="email"
+                    placeholder='Email'
                     value={formData.email}
                     onChange={handleChange}
                   />
@@ -89,14 +85,12 @@ const RegisterPage = () => {
                 </div>
 
                 <div className="mb-3">
-                  <label htmlFor="password" className="form-label">
-                    Пароль *
-                  </label>
                   <input
                     type="password"
                     className="form-control"
                     id="password"
                     name="password"
+                    placeholder='пароль'
                     value={formData.password}
                     onChange={handleChange}
                     required

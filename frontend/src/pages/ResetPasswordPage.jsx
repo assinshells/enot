@@ -60,13 +60,11 @@ const ResetPasswordPage = () => {
 
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">
-                  <label htmlFor="password" className="form-label">
-                    Новый пароль
-                  </label>
                   <input
                     type="password"
                     className="form-control"
                     id="password"
+                    placeholder='пароль'
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -75,13 +73,11 @@ const ResetPasswordPage = () => {
                 </div>
 
                 <div className="mb-3">
-                  <label htmlFor="confirmPassword" className="form-label">
-                    Подтвердите пароль
-                  </label>
                   <input
                     type="password"
                     className="form-control"
                     id="confirmPassword"
+                    placeholder='пароль2'
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required

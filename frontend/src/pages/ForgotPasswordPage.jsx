@@ -52,13 +52,11 @@ const ForgotPasswordPage = () => {
 
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">
-                  <label htmlFor="email" className="form-label">
-                    Email
-                  </label>
                   <input
                     type="email"
                     className="form-control"
                     id="email"
+                    placeholder='Email'
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
