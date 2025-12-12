@@ -7,7 +7,17 @@ import logger from '../config/logger.js';
  */
 class MailService {
   constructor() {
-    this.isDevelopment = process.env.NODE_ENV === 'development';
+    // Проверяем NODE_ENV
+    const nodeEnv = process.env.NODE_ENV;
+    this.isDevelopment = nodeEnv === 'development' || !nodeEnv;
+    
+    // Детальное логирование режима
+    logger.info('='.repeat(60));
+    logger.info('📧 MailService Configuration');
+    logger.info(`NODE_ENV: ${nodeEnv || 'undefined (defaulting to dev mode)'}`);
+    logger.info(`Mode: ${this.isDevelopment ? 'DEVELOPMENT' : 'PRODUCTION'}`);
+    logger.info(`Emails will be: ${this.isDevelopment ? 'LOGGED (not sent)' : 'SENT via SMTP'}`);
+    logger.info('='.repeat(60));
   }
 
   /**
@@ -31,12 +41,22 @@ class MailService {
 
     // В DEV режиме - логируем в консоль
     if (this.isDevelopment) {
-      logger.info({
-        msg: '📧 EMAIL (DEV MODE) - Письмо для восстановления пароля',
-        to: email,
-        resetUrl: resetUrl,
-        subject: mailOptions.subject
-      });
+      logger.info('='.repeat(60));
+      logger.info('📧 EMAIL (DEV MODE) - Password Reset');
+      logger.info('='.repeat(60));
+      logger.info(`To: ${email}`);
+      logger.info(`Subject: ${mailOptions.subject}`);
+      logger.info(`Reset URL: ${resetUrl}`);
+      logger.info('='.repeat(60));
+      
+      // Дополнительно выводим в console.log для гарантии
+      console.log('\n' + '='.repeat(60));
+      console.log('📧 EMAIL (DEV MODE) - Password Reset');
+      console.log('='.repeat(60));
+      console.log(`To: ${email}`);
+      console.log(`Reset URL: ${resetUrl}`);
+      console.log('='.repeat(60) + '\n');
+      
       return;
     }
 
@@ -53,9 +73,9 @@ class MailService {
       });
 
       await transporter.sendMail(mailOptions);
-      logger.info(`Email отправлен на ${email}`);
+      logger.info(`✅ Email sent successfully to ${email}`);
     } catch (error) {
-      logger.error(`Ошибка отправки email: ${error.message}`);
+      logger.error(`❌ Failed to send email to ${email}: ${error.message}`);
       throw new Error('Не удалось отправить письмо');
     }
   }

@@ -30,10 +30,11 @@ request.interceptors.request.use(
 request.interceptors.response.use(
   (response) => response.data,
   (error) => {
-    // Обработка ошибок авторизации
+    // ✅ ИСПРАВЛЕНО: убираем автоматический редирект
+    // Обработка 401 - просто удаляем токен
     if (error.response?.status === 401) {
       removeToken();
-      window.location.href = '/login';
+      // Не делаем редирект здесь - пусть AuthContext обработает
     }
     
     const message = error.response?.data?.message || error.message || 'Произошла ошибка';

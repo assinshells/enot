@@ -3,9 +3,6 @@ import { setToken, removeToken, hasToken } from '../utils/token';
 import * as authApi from '../api/authApi';
 import * as userApi from '../api/userApi';
 
-/**
- * Контекст авторизации
- */
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -22,6 +19,7 @@ export const AuthProvider = ({ children }) => {
           setUser(response.data);
           setIsAuthenticated(true);
         } catch (error) {
+          // Токен невалиден - удаляем его
           removeToken();
           setIsAuthenticated(false);
         }
@@ -30,24 +28,34 @@ export const AuthProvider = ({ children }) => {
     };
 
     checkAuth();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Регистрация
   const registerUser = async (data) => {
-    const response = await authApi.register(data);
-    setToken(response.data.token);
-    setUser(response.data);
-    setIsAuthenticated(true);
-    return response;
+    try {
+      const response = await authApi.register(data);
+      setToken(response.data.token);
+      setUser(response.data);
+      setIsAuthenticated(true);
+      return response;
+    } catch (error) {
+      // ✅ ИСПРАВЛЕНО: пробрасываем ошибку дальше
+      throw error;
+    }
   };
 
   // Авторизация
   const loginUser = async (data) => {
-    const response = await authApi.login(data);
-    setToken(response.data.token);
-    setUser(response.data);
-    setIsAuthenticated(true);
-    return response;
+    try {
+      const response = await authApi.login(data);
+      setToken(response.data.token);
+      setUser(response.data);
+      setIsAuthenticated(true);
+      return response;
+    } catch (error) {
+      // ✅ ИСПРАВЛЕНО: пробрасываем ошибку для обработки в компоненте
+      throw error;
+    }
   };
 
   // Выход
