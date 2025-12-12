@@ -9,15 +9,18 @@ class MailService {
   constructor() {
     // Проверяем NODE_ENV
     const nodeEnv = process.env.NODE_ENV;
-    this.isDevelopment = nodeEnv === 'development' || !nodeEnv;
+    this.isDevelopment = nodeEnv === 'development' || nodeEnv === undefined;
+    this.nodeEnv = nodeEnv || 'undefined';
     
     // Детальное логирование режима
-    logger.info('='.repeat(60));
-    logger.info('📧 MailService Configuration');
-    logger.info(`NODE_ENV: ${nodeEnv || 'undefined (defaulting to dev mode)'}`);
-    logger.info(`Mode: ${this.isDevelopment ? 'DEVELOPMENT' : 'PRODUCTION'}`);
-    logger.info(`Emails will be: ${this.isDevelopment ? 'LOGGED (not sent)' : 'SENT via SMTP'}`);
-    logger.info('='.repeat(60));
+    console.log('='.repeat(60));
+    console.log('📧 MailService Configuration');
+    console.log(`NODE_ENV: ${this.nodeEnv}`);
+    console.log(`Mode: ${this.isDevelopment ? 'DEVELOPMENT' : 'PRODUCTION'}`);
+    console.log(`Emails will be: ${this.isDevelopment ? 'LOGGED (not sent)' : 'SENT via SMTP'}`);
+    console.log('='.repeat(60));
+    // Также логируем через logger (если он работает)
+    logger.info('📧 MailService initialized in ' + (this.isDevelopment ? 'DEVELOPMENT' : 'PRODUCTION') + ' mode');
   }
 
   /**

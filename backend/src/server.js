@@ -6,6 +6,13 @@ import logger from './config/logger.js';
 // Загрузка переменных окружения
 dotenv.config();
 
+// Временная диагностика
+console.log('🔍 Environment check:');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('PORT:', process.env.PORT);
+console.log('.env loaded:', process.env.NODE_ENV !== undefined);
+console.log('---');
+
 const PORT = process.env.PORT || 5000;
 
 // Подключение к MongoDB
