@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 /**
  * Главная страница (защищенная)
  */
-const HomePage = () => {
+const ChatPage = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -62,4 +62,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default ChatPage;

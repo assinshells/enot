@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import HomePage from '../pages/HomePage';
+import ChatPage from '../pages/ChatPage';
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
 import ForgotPasswordPage from '../pages/ForgotPasswordPage';
@@ -56,7 +56,7 @@ const AppRouter = () => {
           path="/"
           element={
             <PrivateRoute>
-              <HomePage />
+              <ChatPage />
             </PrivateRoute>
           }
         />
