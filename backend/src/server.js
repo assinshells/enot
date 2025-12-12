@@ -1,15 +1,28 @@
-import express from 'express';
-import cors from 'cors';
+import dotenv from 'dotenv';
+import app from './app.js';
+import connectDB from './config/db.js';
+import logger from './config/logger.js';
 
-const app = express();
+// Загрузка переменных окружения
+dotenv.config();
 
-app.use(cors());
-app.use(express.json());
+const PORT = process.env.PORT || 5000;
 
-// API endpoint
-app.get('/api/message', (req, res) => {
-  res.json({ message: "Привет от сервера!" });
+// Подключение к MongoDB
+connectDB();
+
+// Запуск сервера
+const server = app.listen(PORT, () => {
+  logger.info(`🚀 Сервер запущен на порту ${PORT} в режиме ${process.env.NODE_ENV || 'development'}`);
 });
 
-const PORT = 4000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// Обработка необработанных ошибок
+process.on('unhandledRejection', (err) => {
+  logger.error(`Необработанная ошибка: ${err.message}`);
+  server.close(() => process.exit(1));
+});
+
+process.on('uncaughtException', (err) => {
+  logger.error(`Необработанное исключение: ${err.message}`);
+  server.close(() => process.exit(1));
+});
