@@ -26,31 +26,97 @@ const ChatPage = () => {
           Открыть правый сайдбар
         </button>
       </div>
-      <div className="container-fluid">
-        <div className="row">
+      <div class="layout-wrapper d-lg-flex">
           {/* Левый сайдбар */}
-          <aside className="col-md-3 col-lg-2 sidebar-left p-3 d-none d-md-block">
-            <h5>Левый сайдбар</h5>
 
-            <button className="btn btn-outline-danger" onClick={handleLogout}>
-              <i className="bi bi-box-arrow-right me-2"></i>
-              Выйти
-            </button>
-          </aside>
+          <div class="side-menu flex-lg-column me-lg-1 ms-lg-0">
+             
+                <div class="navbar-brand-box">
+                    <a href="index.html" class="logo logo-dark">
+                        <span class="logo-sm">
+                            <img src="assets/images/logo.svg" alt="" height="30"/>
+                        </span>
+                    </a>
+
+                    <a href="index.html" class="logo logo-light">
+                        <span class="logo-sm">
+                            <img src="assets/images/logo.svg" alt="" height="30"/>
+                        </span>
+                    </a>
+                </div>
+
+                <div class="flex-lg-column my-auto">
+                    <ul class="nav nav-pills side-menu-nav justify-content-center" role="tablist">
+                        <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="top" title="Profile">
+                            <a class="nav-link" id="pills-user-tab" data-bs-toggle="pill" href="#pills-user" role="tab">
+                                <i class="ri-user-2-line"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="top" title="Chats">
+                            <a class="nav-link active" id="pills-chat-tab" data-bs-toggle="pill" href="#pills-chat" role="tab">
+                                <i class="ri-message-3-line"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="top" title="Groups">
+                            <a class="nav-link" id="pills-groups-tab" data-bs-toggle="pill" href="#pills-groups" role="tab">
+                                <i class="ri-group-line"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="top" title="Contacts">
+                            <a class="nav-link" id="pills-contacts-tab" data-bs-toggle="pill" href="#pills-contacts" role="tab">
+                                <i class="ri-contacts-line"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="top" title="Settings">
+                            <a class="nav-link" id="pills-setting-tab" data-bs-toggle="pill" href="#pills-setting" role="tab">
+                                <i class="ri-settings-2-line"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown profile-user-dropdown d-inline-block d-lg-none">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <img src="assets/images/users/avatar-1.jpg" alt="" class="profile-user rounded-circle" />
+                            </a>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="#">Profile <i class="ri-profile-line float-end text-muted"></i></a>
+                                <a class="dropdown-item" href="#">Setting <i class="ri-settings-3-line float-end text-muted"></i></a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#" onClick={handleLogout}>Log out <i class="ri-logout-circle-r-line float-end text-muted"></i></a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+               
+
+                <div class="flex-lg-column d-none d-lg-block">
+                    <ul class="nav side-menu-nav justify-content-center">
+                        <li class="nav-item">
+                            <a class="nav-link light-dark-mode" href="#" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="right" title="Dark / Light Mode">
+                                <i class='ri-sun-line theme-mode-icon'></i>
+                            </a>
+                        </li>
+
+                        <li class="nav-item btn-group dropup profile-user-dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <img src="assets/images/users/avatar-1.jpg" alt="" class="profile-user rounded-circle"/>
+                            </a>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="#">Profile <i class="ri-profile-line float-end text-muted"></i></a>
+                                <a class="dropdown-item" href="#">Setting <i class="ri-settings-3-line float-end text-muted"></i></a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#" onClick={handleLogout}>Log out <i class="ri-logout-circle-r-line float-end text-muted"></i></a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+             
+            </div>
 
           {/* Основной контент */}
-<main className="col-12 col-md-6 col-lg-8 p-4">
+<div class="user-chat w-100 overflow-hidden">
 
   {/* Окно чата */}
-  <div
-    className="border rounded p-3 mb-3"
-    style={{
-      height: '400px',
-      overflowY: 'auto',
-      backgroundColor: '#fafafa',
-    }}
-  >
-    <div className="">
+  <div class="d-lg-flex">
+    <div className="chat-conversation p-3 p-lg-4">
       <small className="text-muted me-2">07:15:16</small>
       <strong>Пользователь:</strong>
       <div className=" d-inline-block ms-2">
@@ -76,19 +142,38 @@ const ChatPage = () => {
   </div>
 
   {/* Форма отправки */}
-  <form>
-    <div className="input-group">
-      <input
-        type="text"
-        className="form-control"
-        placeholder="Введите сообщение..."
-      />
-      <button type="button" className="btn btn-primary">
-        Отправить
-      </button>
-    </div>
-  </form>
-</main>
+<div class="chat-input-section p-3 p-lg-4 border-top mb-0">
+                            
+                            <div class="row g-0">
+                                
+                                <div class="col">
+                                    <input type="text" class="form-control form-control-lg bg-light border-light" placeholder="Enter Message..." />
+                                </div>
+                                <div class="col-auto">
+                                    <div class="chat-input-links ms-md-2 me-md-0">
+                                        <ul class="list-inline mb-0">
+                                            <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-placement="top" title="Emoji">
+                                                <button type="button" class="btn btn-link text-decoration-none font-size-16 btn-lg waves-effect">
+                                                    <i class="ri-emotion-happy-line"></i>
+                                                </button>
+                                            </li>
+                                            <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-placement="top" title="Attached File">  
+                                                <button type="button" class="btn btn-link text-decoration-none font-size-16 btn-lg waves-effect">
+                                                    <i class="ri-attachment-line"></i>
+                                                </button>
+                                            </li>
+                                            <li class="list-inline-item">
+                                                <button type="submit" class="btn btn-primary font-size-16 btn-lg chat-send waves-effect waves-light">
+                                                    <i class="ri-send-plane-2-fill"></i>
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        </div>
+</div>
 
           {/* Правый сайдбар desktop*/}
           <aside className="col-md-3 col-lg-2 sidebar-right p-3 d-none d-md-block">
@@ -108,28 +193,6 @@ const ChatPage = () => {
             </div>
           </aside>
 
-          {/* Футер (левый сайдбар на мобилке)*/}
-          <footer className="d-md-none p-3 border-top">
-            <h5>Левый сайдбар</h5>
-            <ul className="nav flex-column">
-              <li className="nav-item">
-                <a className="nav-link" href="#">
-                  Пункт 1
-                </a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link" href="#">
-                  Пункт 2
-                </a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link" href="#">
-                  Пункт 3
-                </a>
-              </li>
-            </ul>
-          </footer>
-
           {/* Offcanvas: правый сайдбар (мобилка)*/}
           <div
             className="offcanvas offcanvas-end"
@@ -148,7 +211,7 @@ const ChatPage = () => {
               <p>Дополнительная информация</p>
             </div>
           </div>
-        </div>
+
       </div>
     </>
   );
