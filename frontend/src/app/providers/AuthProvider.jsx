@@ -1,8 +1,8 @@
 /**
- * App: Auth Provider
+ * App: Auth Provider (ИСПРАВЛЕНО)
  * Путь: src/app/providers/AuthProvider.jsx
  */
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useMemo } from "react";
 import { tokenLib } from "@/shared/lib/token/token";
 import { authApi, userApi } from "@/entities/user";
 
@@ -54,6 +54,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Авторизация
   const loginUser = async (data) => {
     try {
       const response = await authApi.login(data);
@@ -68,12 +69,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Выход
   const logout = () => {
     tokenLib.remove();
     setUser(null);
     setIsAuthenticated(false);
   };
 
+  // Мемоизация значения контекста
   const value = useMemo(
     () => ({
       user,
@@ -82,9 +85,11 @@ export const AuthProvider = ({ children }) => {
       registerUser,
       loginUser,
       logout,
+      setUser, // Добавлено для использования в других компонентах
     }),
     [user, loading, isAuthenticated]
   );
 
-  return { children };
+  // ✅ КРИТИЧНО: возвращаем Provider с value
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

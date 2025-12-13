@@ -1,5 +1,5 @@
 /**
- * Shared API: Configured Axios Instance
+ * Shared API: Configured Axios Instance (ОПТИМИЗИРОВАНО)
  * Путь: src/shared/api/request.js
  */
 import axios from "axios";
@@ -13,7 +13,7 @@ const request = axios.create({
   },
 });
 
-// Request interceptor - добавляем токен
+// Request interceptor
 request.interceptors.request.use(
   (config) => {
     const token = tokenLib.get();
@@ -22,34 +22,46 @@ request.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Response interceptor - обработка ответов
+// Response interceptor
 request.interceptors.response.use(
   (response) => response.data,
   (error) => {
     const status = error.response?.status;
+    const pathname = window.location.pathname;
 
-    // Обработка различных статусов
+    // Список публичных путей
+    const publicPaths = [
+      "/login",
+      "/register",
+      "/forgot-password",
+      "/reset-password",
+    ];
+    const isPublicPath = publicPaths.some((path) => pathname.startsWith(path));
+
+    // 401: Неавторизован
     if (status === 401) {
       tokenLib.remove();
-      // Редирект только если не на странице авторизации
-      if (!window.location.pathname.startsWith("/login")) {
+
+      // Редирект только если не на публичной странице
+      if (!isPublicPath) {
         window.location.href = "/login";
       }
     }
 
+    // 403: Доступ запрещен
     if (status === 403) {
       console.error("Access forbidden");
     }
 
+    // 500+: Ошибка сервера
     if (status >= 500) {
       console.error("Server error:", error);
     }
 
+    // Формируем сообщение об ошибке
     const message =
       error.response?.data?.message || error.message || "Произошла ошибка";
 

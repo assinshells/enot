@@ -1,15 +1,17 @@
 /**
- * Feature: Reset Password Hook
+ * Feature: Reset Password Hook (ИСПРАВЛЕНО)
  * Путь: src/features/auth/reset-password-form/model/useResetPassword.js
  */
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { authApi } from "@/entities/user";
 import { tokenLib } from "@/shared/lib/token/token";
+import { useAuth } from "@/shared/lib/hooks/useAuth";
 
 export const useResetPassword = () => {
   const { token } = useParams();
   const navigate = useNavigate();
+  const { setUser } = useAuth(); // ✅ Получаем setUser из контекста
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -20,6 +22,7 @@ export const useResetPassword = () => {
     e.preventDefault();
     setError("");
 
+    // Валидация
     if (password !== confirmPassword) {
       setError("Пароли не совпадают");
       return;
@@ -34,11 +37,15 @@ export const useResetPassword = () => {
 
     try {
       const response = await authApi.resetPassword(token, password);
-      tokenLib.set(response.data.token);
-      setUser(response.data); // Добавляем установку пользователя
+
+      // Сохраняем токен и данные пользователя
+      const { token: authToken, ...userData } = response.data;
+      tokenLib.set(authToken);
+      setUser(userData);
+
       navigate("/");
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Ошибка при сбросе пароля");
     } finally {
       setLoading(false);
     }
