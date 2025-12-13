@@ -34,7 +34,8 @@ export const useResetPassword = () => {
 
     try {
       const response = await authApi.resetPassword(token, password);
-      tokenLib.set(response.token);
+      tokenLib.set(response.data.token);
+      setUser(response.data); // Добавляем установку пользователя
       navigate("/");
     } catch (err) {
       setError(err.message);

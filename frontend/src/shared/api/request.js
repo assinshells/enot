@@ -3,7 +3,7 @@
  * Путь: src/shared/api/request.js
  */
 import axios from "axios";
-import { tokenLib } from "@/shared/lib/token";
+import { tokenLib } from "@/shared/lib/token/token";
 
 const request = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "/api",
@@ -31,12 +31,28 @@ request.interceptors.request.use(
 request.interceptors.response.use(
   (response) => response.data,
   (error) => {
-    if (error.response?.status === 401) {
+    const status = error.response?.status;
+
+    // Обработка различных статусов
+    if (status === 401) {
       tokenLib.remove();
+      // Редирект только если не на странице авторизации
+      if (!window.location.pathname.startsWith("/login")) {
+        window.location.href = "/login";
+      }
+    }
+
+    if (status === 403) {
+      console.error("Access forbidden");
+    }
+
+    if (status >= 500) {
+      console.error("Server error:", error);
     }
 
     const message =
       error.response?.data?.message || error.message || "Произошла ошибка";
+
     return Promise.reject(new Error(message));
   }
 );

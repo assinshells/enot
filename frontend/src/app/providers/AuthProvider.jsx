@@ -16,17 +16,24 @@ export const AuthProvider = ({ children }) => {
   // Проверка авторизации при загрузке
   useEffect(() => {
     const checkAuth = async () => {
-      if (tokenLib.has()) {
-        try {
-          const response = await userApi.getProfile();
-          setUser(response.data);
-          setIsAuthenticated(true);
-        } catch (error) {
-          tokenLib.remove();
-          setIsAuthenticated(false);
-        }
+      const token = tokenLib.get();
+      if (!token) {
+        setLoading(false);
+        return;
       }
-      setLoading(false);
+
+      try {
+        const response = await userApi.getProfile();
+        setUser(response.data);
+        setIsAuthenticated(true);
+      } catch (error) {
+        console.error("Auth check failed:", error);
+        tokenLib.remove();
+        setIsAuthenticated(false);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
     };
 
     checkAuth();
@@ -36,47 +43,48 @@ export const AuthProvider = ({ children }) => {
   const registerUser = async (data) => {
     try {
       const response = await authApi.register(data);
-      tokenLib.set(response.data.token);
-      setUser(response.data);
+      const { token, ...userData } = response.data;
+      tokenLib.set(token);
+      setUser(userData);
       setIsAuthenticated(true);
       return response;
     } catch (error) {
+      console.error("Registration failed:", error);
       throw error;
     }
   };
 
-  // Авторизация
   const loginUser = async (data) => {
     try {
       const response = await authApi.login(data);
-      tokenLib.set(response.data.token);
-      setUser(response.data);
+      const { token, ...userData } = response.data;
+      tokenLib.set(token);
+      setUser(userData);
       setIsAuthenticated(true);
       return response;
     } catch (error) {
+      console.error("Login failed:", error);
       throw error;
     }
   };
 
-  // Выход
   const logout = () => {
     tokenLib.remove();
     setUser(null);
     setIsAuthenticated(false);
   };
 
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        loading,
-        isAuthenticated,
-        registerUser,
-        loginUser,
-        logout,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo(
+    () => ({
+      user,
+      loading,
+      isAuthenticated,
+      registerUser,
+      loginUser,
+      logout,
+    }),
+    [user, loading, isAuthenticated]
   );
+
+  return { children };
 };
