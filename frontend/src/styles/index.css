@@ -2,3 +2,19 @@
   --bs-primary: #ff5722;
   --bs-primary-rgb: 255, 87, 34;
 }
+
+body {
+min-height: 100vh;
+}
+.sidebar-left {
+background-color: #f8f9fa;
+
+}
+.sidebar-right {
+background-color: #f1f3f5;
+
+}
+.content {
+background-color: #ffffff;
+
+}
