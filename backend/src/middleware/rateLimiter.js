@@ -17,9 +17,3 @@ export const messageRateLimit = async (req, res, next) => {
     });
   }
 };
-
-export const authRateLimit = new RateLimiterMemory({
-  points: 5, // 5 попыток
-  duration: 900, // за 15 минут
-  blockDuration: 900, // блокировка на 15 минут
-});

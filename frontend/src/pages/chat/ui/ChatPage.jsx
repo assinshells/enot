@@ -43,55 +43,168 @@ export const ChatPage = () => {
 
   return (
     <>
-      <div className="chat-layout">
-        {/* Левое меню */}
+      <div className="layout-wrapper d-lg-flex">
         <LeftSidebarMenu onOpenSettings={() => setIsSettingsOpen(true)} />
+        <LeftSidebarChat />
+        <div className="user-chat w-100 overflow-hidden">
+          <div className="d-lg-flex">
+            <div className="w-100 overflow-hidden position-relative">
+              {/*<div className="p-3 p-lg-4 border-bottom user-chat-topbar">
+                <div className="row align-items-center">
+                  <div className="col-sm-4 col-8">
+                    <div className="d-flex align-items-center">
+                      <div className="d-block d-lg-none me-2 ms-0">
+                        <a
+                          href="javascript: void(0);"
+                          className="user-chat-remove text-muted font-size-16 p-2"
+                        >
+                          <i className="ri-arrow-left-s-line"></i>
+                        </a>
+                      </div>
+                      <div className="me-3 ms-0">
+                        <img
+                          src="assets/images/users/avatar-4.jpg"
+                          className="rounded-circle avatar-xs"
+                          alt=""
+                        />
+                      </div>
+                      <div className="flex-grow-1 overflow-hidden">
+                        <h5 className="font-size-16 mb-0 text-truncate">
+                          <strong>{currentRoom}</strong>
+                        </h5>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-sm-8 col-4">
+                    <ul className="list-inline user-chat-nav text-end mb-0">
+                      <li className="list-inline-item">
+                        <div className="dropdown">
+                          <button
+                            className="btn nav-btn dropdown-toggle"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                          >
+                            <i className="ri-search-line"></i>
+                          </button>
+                          <div className="dropdown-menu p-0 dropdown-menu-end dropdown-menu-md">
+                            <div className="search-box p-2">
+                              <input
+                                type="text"
+                                className="form-control bg-light border-0"
+                                placeholder="Search.."
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </li>
 
-        {/* Основная область чата */}
-        <div className="chat-main">
-          {/* Шапка с названием комнаты */}
-          <div className="chat-header border-bottom p-3 d-flex justify-content-between align-items-center">
-            <h5 className="mb-0 d-flex align-items-center">
-              <i className="bi bi-chat-dots-fill me-2 text-primary"></i>
-              <strong>{currentRoom}</strong>
-            </h5>
+                      <li className="list-inline-item d-none d-lg-inline-block me-2 ms-0">
+                        <button
+                          type="button"
+                          className="btn nav-btn"
+                          data-bs-toggle="modal"
+                          data-bs-target="#audiocallModal"
+                        >
+                          <i className="ri-phone-line"></i>
+                        </button>
+                      </li>
 
-            {/* ✅ НОВОЕ: Кнопка для мобильного селектора */}
-            <button
-              className="btn btn-outline-primary d-lg-none"
-              type="button"
-              data-bs-toggle="offcanvas"
-              data-bs-target="#roomSelectorOffcanvas"
-            >
-              <i className="bi bi-list"></i> Комнаты
-            </button>
-          </div>
+                      <li className="list-inline-item d-none d-lg-inline-block me-2 ms-0">
+                        <button
+                          type="button"
+                          className="btn nav-btn"
+                          data-bs-toggle="modal"
+                          data-bs-target="#videocallModal"
+                        >
+                          <i className="ri-vidicon-line"></i>
+                        </button>
+                      </li>
 
-          {/* Ошибки */}
-          {localError && (
-            <div className="p-3">
-              <Alert type="danger" onClose={() => setLocalError(null)}>
-                {localError}
-              </Alert>
+                      <li className="list-inline-item d-none d-lg-inline-block me-2 ms-0">
+                        <button
+                          type="button"
+                          className="btn nav-btn user-profile-show"
+                        >
+                          <i className="ri-user-2-line"></i>
+                        </button>
+                      </li>
+
+                      <li className="list-inline-item">
+                        <div className="dropdown">
+                          <button
+                            className="btn nav-btn dropdown-toggle"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                          >
+                            <i className="ri-more-fill"></i>
+                          </button>
+                          <div className="dropdown-menu dropdown-menu-end">
+                            <a
+                              className="dropdown-item d-block d-lg-none user-profile-show"
+                              href="#"
+                            >
+                              View profile{" "}
+                              <i className="ri-user-2-line float-end text-muted"></i>
+                            </a>
+                            <a
+                              className="dropdown-item d-block d-lg-none"
+                              href="#"
+                              data-bs-toggle="modal"
+                              data-bs-target="#audiocallModal"
+                            >
+                              Audio{" "}
+                              <i className="ri-phone-line float-end text-muted"></i>
+                            </a>
+                            <a
+                              className="dropdown-item d-block d-lg-none"
+                              href="#"
+                              data-bs-toggle="modal"
+                              data-bs-target="#videocallModal"
+                            >
+                              Video{" "}
+                              <i className="ri-vidicon-line float-end text-muted"></i>
+                            </a>
+                            <a className="dropdown-item" href="#">
+                              Archive{" "}
+                              <i className="ri-archive-line float-end text-muted"></i>
+                            </a>
+                            <a className="dropdown-item" href="#">
+                              Muted{" "}
+                              <i className="ri-volume-mute-line float-end text-muted"></i>
+                            </a>
+                            <a className="dropdown-item" href="#">
+                              Delete{" "}
+                              <i className="ri-delete-bin-line float-end text-muted"></i>
+                            </a>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>*/}
+              {localError && (
+                <div className="p-3">
+                  <Alert type="danger" onClose={() => setLocalError(null)}>
+                    {localError}
+                  </Alert>
+                </div>
+              )}
+              <ChatMessages messages={messages} loading={loading} />
+              <ChatInput onSendMessage={handleSendMessage} loading={sending} />
             </div>
-          )}
-
-          {/* Сообщения */}
-          <ChatMessages messages={messages} loading={loading} />
-
-          {/* Поле ввода */}
-          <ChatInput onSendMessage={handleSendMessage} loading={sending} />
+            <RoomSidebar currentRoom={currentRoom} onRoomChange={changeRoom} />
+          </div>
         </div>
-
-        {/* Правый сайдбар с комнатами (Desktop) */}
-        <RoomSidebar currentRoom={currentRoom} onRoomChange={changeRoom} />
+        <SettingsModal
+          isOpen={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
+        />
       </div>
-
-      {/* Модалка настроек */}
-      <SettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-      />
     </>
   );
 };

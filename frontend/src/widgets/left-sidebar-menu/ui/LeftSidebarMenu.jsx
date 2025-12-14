@@ -56,7 +56,7 @@ export const LeftSidebarMenu = ({ onOpenSettings }) => {
             {/* Mobile Dropdown */}
             <li className="nav-item dropdown profile-user-dropdown d-inline-block d-lg-none">
               <a
-                className="nav-link dropdown-toggle"
+                className="nav-link dropdown-toggle no-caret"
                 href="#"
                 role="button"
                 data-bs-toggle="dropdown"
@@ -88,7 +88,7 @@ export const LeftSidebarMenu = ({ onOpenSettings }) => {
           <ul className="nav side-menu-nav justify-content-center">
             <li className="nav-item btn-group dropup profile-user-dropdown">
               <a
-                className="nav-link dropdown-toggle"
+                className="nav-link dropdown-toggle no-caret"
                 href="#"
                 role="button"
                 data-bs-toggle="dropdown"

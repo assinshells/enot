@@ -3,6 +3,7 @@
  * Путь: src/widgets/chat/input/ui/ChatInput.jsx
  */
 import { useState } from "react";
+import "./ChatInput.css";
 
 export const ChatInput = ({ onSendMessage, loading }) => {
   const [message, setMessage] = useState("");
@@ -27,7 +28,7 @@ export const ChatInput = ({ onSendMessage, loading }) => {
   return (
     <div className="chat-input-section p-3 p-lg-4 border-top mb-0">
       <form onSubmit={handleSubmit}>
-        <div className="row g-0 align-items-center">
+        <div className="row g-0">
           <div className="col">
             <input
               type="text"
@@ -41,10 +42,10 @@ export const ChatInput = ({ onSendMessage, loading }) => {
             />
           </div>
           <div className="col-auto">
-            <div className="chat-input-links ms-2">
+            <div className="chat-input-links ms-md-2 me-md-0">
               <button
                 type="submit"
-                className="btn btn-primary btn-lg"
+                className="btn btn-primary font-size-16 btn-lg chat-send waves-effect waves-light"
                 disabled={!message.trim() || loading}
               >
                 {loading ? (

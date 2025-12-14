@@ -10,7 +10,6 @@ import validate, {
   loginSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
-  authRateLimitMiddleware,
 } from "../middleware/validateMiddleware.js";
 
 const router = express.Router();
@@ -19,7 +18,7 @@ const router = express.Router();
 router.post("/register", validate(registerSchema), register);
 
 // Авторизация
-router.post("/login", authRateLimitMiddleware, validate(loginSchema), login);
+router.post("/login", validate(loginSchema), login);
 
 // Запрос восстановления пароля
 router.post("/forgot-password", validate(forgotPasswordSchema), forgotPassword);

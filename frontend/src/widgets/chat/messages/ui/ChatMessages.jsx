@@ -35,8 +35,8 @@ export const ChatMessages = ({ messages, loading }) => {
   }
 
   return (
-    <div className="chat-messages">
-      <ul className="chat-conversation list-unstyled mb-0">
+    <div className="chat-conversation p-3 p-lg-4">
+      <ul className="list-unstyled mb-0">
         {messages.map((message) => {
           const isOwn = message.user === user?._id;
 
