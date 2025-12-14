@@ -1,12 +1,12 @@
 /**
- * Widget: Sidebar (ИСПРАВЛЕНО)
- * Путь: src/widgets/sidebar/ui/Sidebar.jsx
+ * Widget: Left Sidebar Menu
+ * Путь: src/widgets/left-sidebar-menu/ui/LeftSidebarMenu.jsx
  */
 import { useAuth } from "@/shared/lib/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import "./Sidebar.css";
+import "./LeftSidebarMenu.css";
 
-export const Sidebar = ({ onOpenSettings }) => {
+export const LeftSidebarMenu = ({ onOpenSettings }) => {
   const { logout } = useAuth();
   const navigate = useNavigate();
 

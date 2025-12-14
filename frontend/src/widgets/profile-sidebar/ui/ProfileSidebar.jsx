@@ -4,6 +4,7 @@
  */
 import { useAuth } from "@/shared/lib/hooks/useAuth";
 import { formatDate } from "@/shared/lib/utils/formatTime";
+import "./ProfileSidebar.css";
 
 export const ProfileSidebar = () => {
   const { user } = useAuth();
@@ -11,9 +12,8 @@ export const ProfileSidebar = () => {
   return (
     <>
       {/* Desktop версия */}
-      <aside className="col-md-3 col-lg-2 sidebar-right p-3 d-none d-md-block">
-        <h5 className="mb-3">Профиль</h5>
-        <div className="profile-info">
+      <aside className="user-profile-sidebar">
+        <div className="px-3 px-lg-4 pt-3 pt-lg-4">
           <div className="mb-3">
             <small className="text-muted d-block">Никнейм</small>
             <strong>{user?.nickname}</strong>
