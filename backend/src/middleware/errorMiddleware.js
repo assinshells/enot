@@ -1,4 +1,4 @@
-import logger from '../config/logger.js';
+import logger from "../config/logger.js";
 
 /**
  * Middleware для обработки ошибок
@@ -12,40 +12,43 @@ export const errorHandler = (err, req, res, next) => {
     message: err.message,
     stack: err.stack,
     url: req.originalUrl,
-    method: req.method
+    method: req.method,
+    user: req.user?._id,
+    ip: req.ip,
   });
 
   // Ошибка дубликата в MongoDB
   if (err.code === 11000) {
     const field = Object.keys(err.keyPattern)[0];
-    message = `${field === 'nickname' ? 'Никнейм' : 'Email'} уже используется`;
+    message = `${field === "nickname" ? "Никнейм" : "Email"} уже используется`;
     statusCode = 400;
   }
 
   // Ошибка валидации MongoDB
-  if (err.name === 'ValidationError') {
+  if (err.name === "ValidationError") {
     message = Object.values(err.errors)
-      .map(val => val.message)
-      .join(', ');
+      .map((val) => val.message)
+      .join(", ");
     statusCode = 400;
   }
 
   // Ошибка JWT
-  if (err.name === 'JsonWebTokenError') {
-    message = 'Недействительный токен';
+  if (err.name === "JsonWebTokenError") {
+    message = "Недействительный токен";
     statusCode = 401;
   }
 
   // Ошибка истекшего JWT
-  if (err.name === 'TokenExpiredError') {
-    message = 'Токен истек';
+  if (err.name === "TokenExpiredError") {
+    message = "Токен истек";
     statusCode = 401;
   }
 
+  // НЕ ОТПРАВЛЯТЬ stack в production
   res.status(statusCode).json({
     success: false,
     message,
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
   });
 };
 

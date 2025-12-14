@@ -1,8 +1,14 @@
 /**
- * App: Auth Provider (ОБНОВЛЕНО С SOCKET.IO)
+ * App: Auth Provider
  * Путь: src/app/providers/AuthProvider.jsx
  */
-import { createContext, useState, useEffect, useMemo } from "react";
+import {
+  createContext,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+} from "react";
 import { tokenLib } from "@/shared/lib/token/token";
 import { socketLib } from "@/shared/lib/socket/socket";
 import { authApi, userApi } from "@/entities/user";

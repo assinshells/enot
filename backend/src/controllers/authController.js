@@ -1,8 +1,8 @@
-import User from '../models/userModel.js';
-import generateToken from '../utils/generateToken.js';
-import { generateResetToken, hashResetToken } from '../utils/passwordHash.js';
-import mailService from '../services/mailService.js';
-import logger from '../config/logger.js';
+import User from "../models/userModel.js";
+import generateToken from "../utils/generateToken.js";
+import { generateResetToken, hashResetToken } from "../utils/passwordHash.js";
+import mailService from "../services/mailService.js";
+import logger from "../config/logger.js";
 
 /**
  * @desc    Регистрация пользователя
@@ -15,16 +15,13 @@ export const register = async (req, res, next) => {
 
     // Проверка существования пользователя
     const userExists = await User.findOne({
-      $or: [
-        { nickname },
-        ...(email ? [{ email }] : [])
-      ]
+      $or: [{ nickname }, ...(email ? [{ email }] : [])],
     });
 
     if (userExists) {
       return res.status(400).json({
         success: false,
-        message: 'Пользователь с таким никнеймом или email уже существует'
+        message: "Пользователь с таким никнеймом или email уже существует",
       });
     }
 
@@ -32,7 +29,7 @@ export const register = async (req, res, next) => {
     const user = await User.create({
       nickname,
       email: email || undefined,
-      password
+      password,
     });
 
     logger.info(`Новый пользователь зарегистрирован: ${nickname}`);
@@ -43,8 +40,8 @@ export const register = async (req, res, next) => {
         _id: user._id,
         nickname: user.nickname,
         email: user.email,
-        token: generateToken(user._id)
-      }
+        token: generateToken(user._id),
+      },
     });
   } catch (error) {
     next(error);
@@ -63,16 +60,16 @@ export const login = async (req, res, next) => {
     // Поиск пользователя по никнейму или email
     const user = await User.findOne({
       $or: [
-        { nickname: login },
-        { email: login }
-      ]
-    }).select('+password');
+        { nickname: String(login) }, // Защита от NoSQL injection
+        { email: login },
+      ],
+    }).select("+password");
 
     if (!user) {
       logger.warn(`Неудачная попытка входа: ${login}`);
       return res.status(401).json({
         success: false,
-        message: 'Неверный логин или пароль'
+        message: "Неверный логин или пароль",
       });
     }
 
@@ -83,7 +80,7 @@ export const login = async (req, res, next) => {
       logger.warn(`Неверный пароль для пользователя: ${login}`);
       return res.status(401).json({
         success: false,
-        message: 'Неверный логин или пароль'
+        message: "Неверный логин или пароль",
       });
     }
 
@@ -95,8 +92,8 @@ export const login = async (req, res, next) => {
         _id: user._id,
         nickname: user.nickname,
         email: user.email,
-        token: generateToken(user._id)
-      }
+        token: generateToken(user._id),
+      },
     });
   } catch (error) {
     next(error);
@@ -117,7 +114,7 @@ export const forgotPassword = async (req, res, next) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'Пользователь с таким email не найден'
+        message: "Пользователь с таким email не найден",
       });
     }
 
@@ -140,7 +137,7 @@ export const forgotPassword = async (req, res, next) => {
 
     res.json({
       success: true,
-      message: 'Письмо для восстановления пароля отправлено'
+      message: "Письмо для восстановления пароля отправлено",
     });
   } catch (error) {
     next(error);
@@ -160,13 +157,13 @@ export const resetPassword = async (req, res, next) => {
     // Поиск пользователя с валидным токеном
     const user = await User.findOne({
       resetPasswordToken: hashedToken,
-      resetPasswordExpire: { $gt: Date.now() }
+      resetPasswordExpire: { $gt: Date.now() },
     });
 
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: 'Недействительный или истекший токен'
+        message: "Недействительный или истекший токен",
       });
     }
 
@@ -180,13 +177,13 @@ export const resetPassword = async (req, res, next) => {
 
     res.json({
       success: true,
-      message: 'Пароль успешно изменен',
+      message: "Пароль успешно изменен",
       data: {
         _id: user._id,
         nickname: user.nickname,
         email: user.email,
-        token: generateToken(user._id)
-      }
+        token: generateToken(user._id),
+      },
     });
   } catch (error) {
     next(error);

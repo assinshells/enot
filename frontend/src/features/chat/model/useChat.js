@@ -21,6 +21,7 @@ export const useChat = () => {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // ✅ НОВОЕ: Список комнат и счётчики
   const [rooms, setRooms] = useState([]);
@@ -82,24 +83,28 @@ export const useChat = () => {
       const socket = socketLib.getSocket();
       if (!socket) return;
 
-      // ✅ Отключаем обработку сообщений
       setLoading(true);
+      let handled = false;
 
-      // ✅ Последовательность действий
       socket.emit("room:leave");
 
-      socket.once("room:left", () => {
-        setMessages([]); // Очищаем только после выхода
-        setCurrentRoom(newRoom);
-        socket.emit("room:join", { room: newRoom });
-      });
-
-      // Fallback если сервер не ответит
-      setTimeout(() => {
+      const handleLeft = () => {
+        if (handled) return;
+        handled = true;
         setMessages([]);
         setCurrentRoom(newRoom);
         socket.emit("room:join", { room: newRoom });
-      }, 1000);
+        socket.off("room:left", handleLeft);
+      };
+
+      socket.once("room:left", handleLeft);
+
+      setTimeout(() => {
+        if (!handled) {
+          console.warn("Server didn't respond, forcing room change");
+          handleLeft();
+        }
+      }, 3000);
     },
     [currentRoom]
   );

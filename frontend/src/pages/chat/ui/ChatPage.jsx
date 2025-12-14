@@ -2,7 +2,7 @@
  * Page: Chat
  * Путь: src/pages/chat/ui/ChatPage.jsx
  */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { LeftSidebarMenu } from "@/widgets/left-sidebar-menu/ui/LeftSidebarMenu";
 import { LeftSidebarChat } from "@/widgets/left-sidebar-chat/ui/LeftSidebarChat";
 import { RoomSidebar } from "@/widgets/room-sidebar/ui/RoomSidebar";

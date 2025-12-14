@@ -1,29 +1,34 @@
-import express from 'express';
+import express from "express";
 import {
   register,
   login,
   forgotPassword,
-  resetPassword
-} from '../controllers/authController.js';
+  resetPassword,
+} from "../controllers/authController.js";
 import validate, {
   registerSchema,
   loginSchema,
   forgotPasswordSchema,
-  resetPasswordSchema
-} from '../middleware/validateMiddleware.js';
+  resetPasswordSchema,
+  authRateLimitMiddleware,
+} from "../middleware/validateMiddleware.js";
 
 const router = express.Router();
 
 // Регистрация
-router.post('/register', validate(registerSchema), register);
+router.post("/register", validate(registerSchema), register);
 
 // Авторизация
-router.post('/login', validate(loginSchema), login);
+router.post("/login", authRateLimitMiddleware, validate(loginSchema), login);
 
 // Запрос восстановления пароля
-router.post('/forgot-password', validate(forgotPasswordSchema), forgotPassword);
+router.post("/forgot-password", validate(forgotPasswordSchema), forgotPassword);
 
 // Сброс пароля
-router.post('/reset-password/:token', validate(resetPasswordSchema), resetPassword);
+router.post(
+  "/reset-password/:token",
+  validate(resetPasswordSchema),
+  resetPassword
+);
 
 export default router;

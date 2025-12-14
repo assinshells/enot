@@ -38,6 +38,8 @@ const messageSchema = new mongoose.Schema(
 
 // ✅ Составной индекс для оптимизации запросов
 messageSchema.index({ room: 1, createdAt: -1 });
+messageSchema.index({ user: 1, room: 1 }); // Для поиска сообщений пользователя
+userSchema.index({ email: 1 }); // Для быстрого поиска по email
 
 const Message = mongoose.model("Message", messageSchema);
 
