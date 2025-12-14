@@ -1,7 +1,3 @@
-/**
- * Model: Message
- * Путь: backend/src/models/messageModel.js
- */
 import mongoose from "mongoose";
 
 const messageSchema = new mongoose.Schema(
@@ -10,10 +6,17 @@ const messageSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
+      index: true, // ✅ Индекс для быстрого поиска
     },
     nickname: {
       type: String,
       required: true,
+    },
+    room: {
+      type: String,
+      required: true,
+      enum: ["Главная", "Знакомства", "Беспредел"], // ✅ Валидация
+      index: true, // ✅ Индекс для фильтрации по комнате
     },
     text: {
       type: String,
@@ -24,16 +27,17 @@ const messageSchema = new mongoose.Schema(
     createdAt: {
       type: Date,
       default: Date.now,
-      expires: 86400, // 24 часа в секундах (TTL index)
+      expires: 86400, // TTL: 24 часа
+      index: true, // ✅ Индекс для сортировки
     },
   },
   {
-    timestamps: false, // Отключаем updatedAt, используем только createdAt
+    timestamps: false,
   }
 );
 
-// Индексы для оптимизации
-messageSchema.index({ createdAt: -1 });
+// ✅ Составной индекс для оптимизации запросов
+messageSchema.index({ room: 1, createdAt: -1 });
 
 const Message = mongoose.model("Message", messageSchema);
 

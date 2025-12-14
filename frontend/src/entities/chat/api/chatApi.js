@@ -5,13 +5,24 @@
 import { request } from "@/shared/api/request";
 
 export const chatApi = {
-  // Получить последние сообщения
-  getMessages: async () => {
-    return request.get("/chat/messages");
+  /**
+   * Получить последние сообщения комнаты
+   * @param {string} room - Название комнаты
+   * @param {object} options - Axios options (signal для отмены)
+   */
+  getMessages: async (room, options = {}) => {
+    return request.get("/chat/messages", {
+      params: { room },
+      ...options,
+    });
   },
 
-  // Отправить сообщение
-  sendMessage: async (text) => {
-    return request.post("/chat/messages", { text });
+  /**
+   * Отправить сообщение в комнату
+   * @param {string} text - Текст сообщения
+   * @param {string} room - Название комнаты
+   */
+  sendMessage: async (text, room) => {
+    return request.post("/chat/messages", { text, room });
   },
 };

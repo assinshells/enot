@@ -7,8 +7,14 @@ import { useRegisterForm } from "../model/useRegisterForm";
 import { Input, Button, Alert, Card } from "@/shared/ui";
 
 export const RegisterForm = () => {
-  const { formData, error, loading, handleChange, handleSubmit } =
-    useRegisterForm();
+  const {
+    formData,
+    error,
+    loading,
+    handleChange,
+    handleSubmit,
+    availableRooms,
+  } = useRegisterForm();
 
   return (
     <Card title="Регистрация">
@@ -43,6 +49,31 @@ export const RegisterForm = () => {
           required
           minLength={6}
         />
+
+        {/* ✅ НОВОЕ: Выбор комнаты */}
+        <div className="mb-3">
+          <label htmlFor="room" className="form-label">
+            Комната
+          </label>
+          <select
+            className="form-select"
+            id="room"
+            name="room"
+            value={formData.room}
+            onChange={handleChange}
+            required
+          >
+            <option value="">Выберите комнату...</option>
+            {availableRooms.map((room) => (
+              <option key={room} value={room}>
+                {room}
+              </option>
+            ))}
+          </select>
+          <small className="text-muted">
+            Вы сразу попадёте в выбранную комнату после регистрации
+          </small>
+        </div>
 
         <Button type="submit" loading={loading} fullWidth>
           Зарегистрироваться

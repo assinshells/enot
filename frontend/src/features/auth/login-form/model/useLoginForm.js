@@ -6,6 +6,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/shared/lib/hooks/useAuth";
 
+const AVAILABLE_ROOMS = ["Главная", "Знакомства", "Беспредел"];
+
 export const useLoginForm = () => {
   const navigate = useNavigate();
   const { loginUser } = useAuth();
@@ -13,6 +15,7 @@ export const useLoginForm = () => {
   const [formData, setFormData] = useState({
     login: "",
     password: "",
+    room: "", // ✅ НОВОЕ: выбранная комната
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,10 +30,29 @@ export const useLoginForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    // ✅ Валидация комнаты
+    if (!formData.room) {
+      setError("Выберите комнату");
+      return;
+    }
+
+    if (!AVAILABLE_ROOMS.includes(formData.room)) {
+      setError("Выбрана недопустимая комната");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      await loginUser(formData);
+      await loginUser({
+        login: formData.login,
+        password: formData.password,
+      });
+
+      // ✅ Сохраняем выбранную комнату
+      sessionStorage.setItem("initialRoom", formData.room);
+
       navigate("/");
     } catch (err) {
       setError(err.message);
@@ -43,6 +65,7 @@ export const useLoginForm = () => {
     formData,
     error,
     loading,
+    availableRooms: AVAILABLE_ROOMS,
     handleChange,
     handleSubmit,
   };

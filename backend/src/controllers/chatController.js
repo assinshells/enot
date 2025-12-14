@@ -1,21 +1,36 @@
-/**
- * Controller: Chat
- * Путь: backend/src/controllers/chatController.js
- */
 import Message from "../models/messageModel.js";
+import { sendMessageToRoom } from "../services/socketService.js";
+import roomManager from "../services/roomManager.js";
 import logger from "../config/logger.js";
 
+/**
+ * Получить сообщения комнаты
+ * @route GET /api/chat/messages?room=Главная
+ */
 export const getMessages = async (req, res, next) => {
   try {
-    const messages = await Message.find()
+    const { room } = req.query;
+
+    // ✅ Валидация комнаты
+    if (!room || !roomManager.isValidRoom(room)) {
+      return res.status(400).json({
+        success: false,
+        message: "Укажите корректную комнату",
+      });
+    }
+
+    // ✅ Фильтруем по комнате
+    const messages = await Message.find({ room })
       .sort({ createdAt: -1 })
-      .limit(100)
+      .limit(50) // Последние 50 сообщений
       .lean()
-      .select("-__v"); // Оптимизация: не возвращаем __v
+      .select("-__v");
 
     const orderedMessages = messages.reverse();
 
-    logger.info(`Получено ${orderedMessages.length} сообщений`);
+    logger.info(
+      `Получено ${orderedMessages.length} сообщений для комнаты "${room}"`
+    );
 
     res.json({
       success: true,
@@ -26,10 +41,15 @@ export const getMessages = async (req, res, next) => {
   }
 };
 
+/**
+ * Создать сообщение в комнате
+ * @route POST /api/chat/messages
+ */
 export const createMessage = async (req, res, next) => {
   try {
-    const { text } = req.body;
+    const { text, room } = req.body;
 
+    // ✅ Валидация
     if (!text || !text.trim()) {
       return res.status(400).json({
         success: false,
@@ -37,7 +57,6 @@ export const createMessage = async (req, res, next) => {
       });
     }
 
-    // Проверка длины
     if (text.trim().length > 1000) {
       return res.status(400).json({
         success: false,
@@ -45,24 +64,38 @@ export const createMessage = async (req, res, next) => {
       });
     }
 
+    if (!room || !roomManager.isValidRoom(room)) {
+      return res.status(400).json({
+        success: false,
+        message: "Укажите корректную комнату",
+      });
+    }
+
+    // ✅ Проверяем, что пользователь в этой комнате
+    const userRoom = roomManager.getUserRoom(req.user._id.toString());
+    if (userRoom !== room) {
+      return res.status(403).json({
+        success: false,
+        message: "Вы не находитесь в этой комнате",
+      });
+    }
+
+    // ✅ Создаём сообщение
     const message = await Message.create({
       user: req.user._id,
       nickname: req.user.nickname,
+      room,
       text: text.trim(),
     });
 
-    logger.info(`Сообщение создано: ${message._id} от ${req.user.nickname}`);
+    logger.info(`Сообщение создано: ${message._id} в комнате "${room}"`);
 
-    // Отправка через Socket.IO
-    const io = await import("../services/socketService.js").then((m) =>
-      m.getIO()
-    );
-
-    // ✅ Отправляем только необходимые данные
-    io.emit("message:new", {
+    // ✅ Отправляем ТОЛЬКО в эту комнату
+    sendMessageToRoom(room, "message:new", {
       _id: message._id,
       user: message.user,
       nickname: message.nickname,
+      room: message.room,
       text: message.text,
       createdAt: message.createdAt,
     });

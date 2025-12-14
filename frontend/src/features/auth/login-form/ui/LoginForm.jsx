@@ -7,8 +7,14 @@ import { useLoginForm } from "../model/useLoginForm";
 import { Input, Button, Alert, Card } from "@/shared/ui";
 
 export const LoginForm = () => {
-  const { formData, error, loading, handleChange, handleSubmit } =
-    useLoginForm();
+  const {
+    formData,
+    error,
+    loading,
+    handleChange,
+    handleSubmit,
+    availableRooms,
+  } = useLoginForm();
 
   return (
     <Card title="Вход">
@@ -31,6 +37,31 @@ export const LoginForm = () => {
           onChange={handleChange}
           required
         />
+
+        {/* ✅ НОВОЕ: Выбор комнаты */}
+        <div className="mb-3">
+          <label htmlFor="room" className="form-label">
+            Комната
+          </label>
+          <select
+            className="form-select"
+            id="room"
+            name="room"
+            value={formData.room}
+            onChange={handleChange}
+            required
+          >
+            <option value="">Выберите комнату...</option>
+            {availableRooms.map((room) => (
+              <option key={room} value={room}>
+                {room}
+              </option>
+            ))}
+          </select>
+          <small className="text-muted">
+            Вы войдёте в выбранную комнату после авторизации
+          </small>
+        </div>
 
         <div className="mb-3">
           <Link to="/forgot-password" className="text-decoration-none">
