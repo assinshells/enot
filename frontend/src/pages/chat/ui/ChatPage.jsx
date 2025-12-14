@@ -28,6 +28,10 @@ export const ChatPage = () => {
   } = useChat();
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [localError, setLocalError] = useState(null);
+  useEffect(() => {
+    setLocalError(error);
+  }, [error]);
 
   const handleSendMessage = async (text) => {
     try {
@@ -64,10 +68,10 @@ export const ChatPage = () => {
           </div>
 
           {/* Ошибки */}
-          {error && (
+          {localError && (
             <div className="p-3">
-              <Alert type="danger" onClose={() => {}}>
-                {error}
+              <Alert type="danger" onClose={() => setLocalError(null)}>
+                {localError}
               </Alert>
             </div>
           )}

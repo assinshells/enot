@@ -14,7 +14,6 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Проверка авторизации при загрузке
   useEffect(() => {
     const checkAuth = async () => {
       const token = tokenLib.get();
@@ -27,9 +26,6 @@ export const AuthProvider = ({ children }) => {
         const response = await userApi.getProfile();
         setUser(response.data);
         setIsAuthenticated(true);
-
-        // Подключаемся к Socket.IO после успешной авторизации
-        socketLib.connect();
       } catch (error) {
         console.error("Auth check failed:", error);
         tokenLib.remove();
@@ -43,8 +39,20 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
+  useEffect(() => {
+    if (isAuthenticated && tokenLib.get()) {
+      socketLib.connect();
+    }
+
+    return () => {
+      if (!isAuthenticated) {
+        socketLib.disconnect();
+      }
+    };
+  }, [isAuthenticated]);
+
   // Регистрация
-  const registerUser = async (data) => {
+  const registerUser = useCallback(async (data) => {
     try {
       const response = await authApi.register(data);
       const { token, ...userData } = response.data;
@@ -60,10 +68,10 @@ export const AuthProvider = ({ children }) => {
       console.error("Registration failed:", error);
       throw error;
     }
-  };
+  }, []);
 
   // Авторизация
-  const loginUser = async (data) => {
+  const loginUser = useCallback(async (data) => {
     try {
       const response = await authApi.login(data);
       const { token, ...userData } = response.data;
@@ -79,17 +87,17 @@ export const AuthProvider = ({ children }) => {
       console.error("Login failed:", error);
       throw error;
     }
-  };
+  }, []);
 
   // Выход
-  const logout = () => {
+  const logout = useCallback(() => {
     tokenLib.remove();
     setUser(null);
     setIsAuthenticated(false);
 
     // Отключаемся от Socket.IO
     socketLib.disconnect();
-  };
+  }, []);
 
   // Мемоизация значения контекста
   const value = useMemo(
@@ -102,7 +110,7 @@ export const AuthProvider = ({ children }) => {
       logout,
       setUser,
     }),
-    [user, loading, isAuthenticated]
+    [user, loading, isAuthenticated, registerUser, loginUser, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

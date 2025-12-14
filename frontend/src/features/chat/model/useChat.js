@@ -7,10 +7,15 @@ import { chatApi } from "@/entities/chat/api/chatApi";
 import { socketLib } from "@/shared/lib/socket/socket";
 
 export const useChat = () => {
-  // ✅ Читаем начальную комнату из sessionStorage (установлена при логине/регистрации)
-  const initialRoom = sessionStorage.getItem("initialRoom") || "Главная";
+  const AVAILABLE_ROOMS = ["Главная", "Знакомства", "Беспредел"];
+  const DEFAULT_ROOM = "Главная";
 
-  const [currentRoom, setCurrentRoom] = useState(initialRoom);
+  const getInitialRoom = () => {
+    const stored = sessionStorage.getItem("initialRoom");
+    return stored && AVAILABLE_ROOMS.includes(stored) ? stored : DEFAULT_ROOM;
+  };
+
+  const [currentRoom, setCurrentRoom] = useState(getInitialRoom);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
@@ -33,7 +38,7 @@ export const useChat = () => {
    * Загрузить историю комнаты
    */
   const loadMessages = useCallback(async (room) => {
-    // ✅ Отменяем предыдущий запрос
+    // Отменяем предыдущий запрос
     abortControllerRef.current?.abort();
 
     const controller = new AbortController();
@@ -50,13 +55,18 @@ export const useChat = () => {
       // ✅ Проверяем, что запрос не отменён
       if (!controller.signal.aborted) {
         setMessages(response.data || []);
+        setLoading(false);
       }
     } catch (err) {
-      if (err.name === "AbortError") return; // Игнорируем отменённые
-      console.error("Ошибка загрузки сообщений:", err);
-      setError(err.message);
-    } finally {
+      // ✅ Правильная обработка отмены
+      if (err.name === "CanceledError" || err.name === "AbortError") {
+        console.log("Request canceled for room:", room);
+        return; // Не меняем состояние
+      }
+
       if (!controller.signal.aborted) {
+        console.error("Error loading messages:", err);
+        setError(err.message);
         setLoading(false);
       }
     }
@@ -72,17 +82,26 @@ export const useChat = () => {
       const socket = socketLib.getSocket();
       if (!socket) return;
 
-      // ✅ Выход из старой комнаты
+      // ✅ Отключаем обработку сообщений
+      setLoading(true);
+
+      // ✅ Последовательность действий
       socket.emit("room:leave");
 
-      // ✅ Вход в новую комнату
-      socket.emit("room:join", { room: newRoom });
+      socket.once("room:left", () => {
+        setMessages([]); // Очищаем только после выхода
+        setCurrentRoom(newRoom);
+        socket.emit("room:join", { room: newRoom });
+      });
 
-      setCurrentRoom(newRoom);
-      setMessages([]); // ✅ Очищаем старые сообщения
-      loadMessages(newRoom);
+      // Fallback если сервер не ответит
+      setTimeout(() => {
+        setMessages([]);
+        setCurrentRoom(newRoom);
+        socket.emit("room:join", { room: newRoom });
+      }, 1000);
     },
-    [currentRoom, loadMessages]
+    [currentRoom]
   );
 
   /**
@@ -133,9 +152,14 @@ export const useChat = () => {
     };
 
     const handleRoomJoined = ({ room, counts }) => {
-      console.log(`✅ Присоединились к комнате "${room}"`, counts);
+      console.log(`✅ Joined room "${room}"`);
       setCounts(counts);
-      loadMessages(room);
+
+      // ✅ Загружаем только если еще не инициализированы
+      if (!isInitialized) {
+        loadMessages(room);
+        setIsInitialized(true);
+      }
     };
 
     const handleRoomList = (data) => {

@@ -1,9 +1,11 @@
 // backend/src/services/roomManager.js
+import { ROOM_NAMES } from "../../../frontend/src/shared/config/rooms.js";
+
 class RoomManager {
   constructor() {
-    this.rooms = new Map(); // roomName => Set<socketId>
-    this.userRooms = new Map(); // userId => roomName
-    this.validRooms = ["Главная", "Знакомства", "Беспредел"];
+    this.rooms = new Map();
+    this.userRooms = new Map();
+    this.validRooms = ROOM_NAMES; // ✅ Из конфига
   }
 
   /**

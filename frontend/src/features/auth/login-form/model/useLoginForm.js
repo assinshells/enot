@@ -5,6 +5,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/shared/lib/hooks/useAuth";
+import { ROOM_NAMES, DEFAULT_ROOM } from "@/shared/config/rooms";
 
 const AVAILABLE_ROOMS = ["Главная", "Знакомства", "Беспредел"];
 
@@ -15,7 +16,7 @@ export const useLoginForm = () => {
   const [formData, setFormData] = useState({
     login: "",
     password: "",
-    room: "", // ✅ НОВОЕ: выбранная комната
+    room: DEFAULT_ROOM,
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -65,7 +66,7 @@ export const useLoginForm = () => {
     formData,
     error,
     loading,
-    availableRooms: AVAILABLE_ROOMS,
+    availableRooms: ROOM_NAMES,
     handleChange,
     handleSubmit,
   };
