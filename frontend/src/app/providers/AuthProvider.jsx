@@ -1,9 +1,10 @@
 /**
- * App: Auth Provider (ИСПРАВЛЕНО)
+ * App: Auth Provider (ОБНОВЛЕНО С SOCKET.IO)
  * Путь: src/app/providers/AuthProvider.jsx
  */
 import { createContext, useState, useEffect, useMemo } from "react";
 import { tokenLib } from "@/shared/lib/token/token";
+import { socketLib } from "@/shared/lib/socket/socket";
 import { authApi, userApi } from "@/entities/user";
 
 export const AuthContext = createContext();
@@ -26,6 +27,9 @@ export const AuthProvider = ({ children }) => {
         const response = await userApi.getProfile();
         setUser(response.data);
         setIsAuthenticated(true);
+
+        // Подключаемся к Socket.IO после успешной авторизации
+        socketLib.connect();
       } catch (error) {
         console.error("Auth check failed:", error);
         tokenLib.remove();
@@ -47,6 +51,10 @@ export const AuthProvider = ({ children }) => {
       tokenLib.set(token);
       setUser(userData);
       setIsAuthenticated(true);
+
+      // Подключаемся к Socket.IO
+      socketLib.connect();
+
       return response;
     } catch (error) {
       console.error("Registration failed:", error);
@@ -62,6 +70,10 @@ export const AuthProvider = ({ children }) => {
       tokenLib.set(token);
       setUser(userData);
       setIsAuthenticated(true);
+
+      // Подключаемся к Socket.IO
+      socketLib.connect();
+
       return response;
     } catch (error) {
       console.error("Login failed:", error);
@@ -74,6 +86,9 @@ export const AuthProvider = ({ children }) => {
     tokenLib.remove();
     setUser(null);
     setIsAuthenticated(false);
+
+    // Отключаемся от Socket.IO
+    socketLib.disconnect();
   };
 
   // Мемоизация значения контекста
@@ -85,11 +100,10 @@ export const AuthProvider = ({ children }) => {
       registerUser,
       loginUser,
       logout,
-      setUser, // Добавлено для использования в других компонентах
+      setUser,
     }),
     [user, loading, isAuthenticated]
   );
 
-  // ✅ КРИТИЧНО: возвращаем Provider с value
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

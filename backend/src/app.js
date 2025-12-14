@@ -1,11 +1,12 @@
-import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import morgan from 'morgan';
-import logger from './config/logger.js';
-import authRoutes from './routes/authRoutes.js';
-import userRoutes from './routes/userRoutes.js';
-import { errorHandler, notFound } from './middleware/errorMiddleware.js';
+import express from "express";
+import cors from "cors";
+import helmet from "helmet";
+import morgan from "morgan";
+import logger from "./config/logger.js";
+import authRoutes from "./routes/authRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import chatRoutes from "./routes/chatRoutes.js";
+import { errorHandler, notFound } from "./middleware/errorMiddleware.js";
 
 const app = express();
 
@@ -13,25 +14,30 @@ const app = express();
 app.use(helmet());
 
 // CORS
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN || "http://localhost:5173",
+    credentials: true,
+  })
+);
 
 // Body parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Логирование HTTP запросов через Morgan + Pino
-app.use(morgan('combined', {
-  stream: {
-    write: (message) => logger.info(message.trim())
-  }
-}));
+app.use(
+  morgan("combined", {
+    stream: {
+      write: (message) => logger.info(message.trim()),
+    },
+  })
+);
 
 // API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/chat", chatRoutes);
 
 // Обработка несуществующих маршрутов
 app.use(notFound);

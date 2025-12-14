@@ -77,7 +77,7 @@ body {
     line-height: 48px;
   }
 }
-
+/*
 .chat-conversation li {
   clear: both;
 }
@@ -272,4 +272,14 @@ body {
 
 .chat-input-links .list-inline-item:not(:last-child) {
   margin: 0;
+}
+*/
+
+/* Правые сообщения (мои) */
+.chat-conversation li.right {
+  text-align: left;
+}
+
+.chat-conversation li.right .ctext-wrap-content {
+  justify-content: flex-start;
 }
