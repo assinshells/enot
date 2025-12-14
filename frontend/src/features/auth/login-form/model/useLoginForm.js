@@ -1,13 +1,7 @@
-/**
- * Feature: Login Form Hook
- * Путь: src/features/auth/login-form/model/useLoginForm.js
- */
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/shared/lib/hooks/useAuth";
-import { ROOM_NAMES, DEFAULT_ROOM } from "@/shared/config/rooms";
-
-const AVAILABLE_ROOMS = ["Главная", "Знакомства", "Беспредел"];
+import { ROOM_NAMES, DEFAULT_ROOM, isValidRoom } from "@/shared/config/rooms";
 
 export const useLoginForm = () => {
   const navigate = useNavigate();
@@ -32,14 +26,8 @@ export const useLoginForm = () => {
     e.preventDefault();
     setError("");
 
-    // ✅ Валидация комнаты
-    if (!formData.room) {
-      setError("Выберите комнату");
-      return;
-    }
-
-    if (!AVAILABLE_ROOMS.includes(formData.room)) {
-      setError("Выбрана недопустимая комната");
+    if (!formData.room || !isValidRoom(formData.room)) {
+      setError("Выберите корректную комнату");
       return;
     }
 
@@ -51,9 +39,7 @@ export const useLoginForm = () => {
         password: formData.password,
       });
 
-      // ✅ Сохраняем выбранную комнату
       sessionStorage.setItem("initialRoom", formData.room);
-
       navigate("/");
     } catch (err) {
       setError(err.message);

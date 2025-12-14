@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/shared/lib/hooks/useAuth";
-
-const AVAILABLE_ROOMS = ["Главная", "Знакомства", "Беспредел"];
+import { ROOM_NAMES, DEFAULT_ROOM, isValidRoom } from "@/shared/config/rooms";
 
 export const useRegisterForm = () => {
   const navigate = useNavigate();
@@ -12,7 +11,7 @@ export const useRegisterForm = () => {
     nickname: "",
     email: "",
     password: "",
-    room: "", // ✅ НОВОЕ: выбранная комната
+    room: DEFAULT_ROOM,
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -28,31 +27,21 @@ export const useRegisterForm = () => {
     e.preventDefault();
     setError("");
 
-    // ✅ Валидация комнаты
-    if (!formData.room) {
-      setError("Выберите комнату");
-      return;
-    }
-
-    if (!AVAILABLE_ROOMS.includes(formData.room)) {
-      setError("Выбрана недопустимая комната");
+    if (!formData.room || !isValidRoom(formData.room)) {
+      setError("Выберите корректную комнату");
       return;
     }
 
     setLoading(true);
 
     try {
-      // Регистрируем пользователя
       await registerUser({
         nickname: formData.nickname,
         email: formData.email,
         password: formData.password,
       });
 
-      // ✅ Сохраняем выбранную комнату в sessionStorage
       sessionStorage.setItem("initialRoom", formData.room);
-
-      // Переходим в чат
       navigate("/");
     } catch (err) {
       setError(err.message);
@@ -65,7 +54,7 @@ export const useRegisterForm = () => {
     formData,
     error,
     loading,
-    availableRooms: AVAILABLE_ROOMS,
+    availableRooms: ROOM_NAMES,
     handleChange,
     handleSubmit,
   };

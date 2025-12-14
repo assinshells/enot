@@ -45,7 +45,7 @@ export const ChatPage = () => {
     <>
       <div className="layout-wrapper d-lg-flex">
         <LeftSidebarMenu onOpenSettings={() => setIsSettingsOpen(true)} />
-        <LeftSidebarChat />
+        {/*<LeftSidebarChat />*/}
         <div className="user-chat w-100 overflow-hidden">
           <div className="d-lg-flex">
             <div className="w-100 overflow-hidden position-relative">

@@ -6,7 +6,7 @@ const messageSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      index: true, // ✅ Индекс для быстрого поиска
+      index: true,
     },
     nickname: {
       type: String,
@@ -15,8 +15,8 @@ const messageSchema = new mongoose.Schema(
     room: {
       type: String,
       required: true,
-      enum: ["Главная", "Знакомства", "Беспредел"], // ✅ Валидация
-      index: true, // ✅ Индекс для фильтрации по комнате
+      enum: ["Главная", "Знакомства", "Беспредел"],
+      index: true,
     },
     text: {
       type: String,
@@ -27,8 +27,8 @@ const messageSchema = new mongoose.Schema(
     createdAt: {
       type: Date,
       default: Date.now,
-      expires: 86400, // TTL: 24 часа
-      index: true, // ✅ Индекс для сортировки
+      expires: 86400,
+      index: true,
     },
   },
   {
@@ -36,8 +36,8 @@ const messageSchema = new mongoose.Schema(
   }
 );
 
-// ✅ Составной индекс для оптимизации запросов
 messageSchema.index({ room: 1, createdAt: -1 });
+messageSchema.index({ user: 1, room: 1 });
 
 const Message = mongoose.model("Message", messageSchema);
 

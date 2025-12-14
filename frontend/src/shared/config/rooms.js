@@ -1,4 +1,3 @@
-// shared/config/rooms.js
 export const ROOMS_CONFIG = [
   {
     id: "main",
@@ -22,3 +21,5 @@ export const ROOMS_CONFIG = [
 
 export const ROOM_NAMES = ROOMS_CONFIG.map((r) => r.name);
 export const DEFAULT_ROOM = ROOMS_CONFIG[0].name;
+
+export const isValidRoom = (roomName) => ROOM_NAMES.includes(roomName);

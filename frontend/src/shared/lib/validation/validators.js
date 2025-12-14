@@ -1,11 +1,17 @@
-// frontend/src/shared/lib/validation/validators.js
+import {
+  MIN_NICKNAME_LENGTH,
+  MAX_NICKNAME_LENGTH,
+  MIN_PASSWORD_LENGTH,
+  MAX_MESSAGE_LENGTH,
+} from "@/shared/config/constants";
+
 export const validators = {
   nickname: (value) => {
-    if (!value || value.trim().length < 3) {
-      return "Никнейм должен быть минимум 3 символа";
+    if (!value || value.trim().length < MIN_NICKNAME_LENGTH) {
+      return `Никнейм должен быть минимум ${MIN_NICKNAME_LENGTH} символа`;
     }
-    if (value.trim().length > 30) {
-      return "Никнейм не должен превышать 30 символов";
+    if (value.trim().length > MAX_NICKNAME_LENGTH) {
+      return `Никнейм не должен превышать ${MAX_NICKNAME_LENGTH} символов`;
     }
     if (!/^[a-zA-Z0-9_-]+$/.test(value)) {
       return "Никнейм может содержать только латинские буквы, цифры, _ и -";
@@ -14,7 +20,7 @@ export const validators = {
   },
 
   email: (value) => {
-    if (!value) return null; // email опциональный
+    if (!value) return null;
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(value)) {
@@ -24,8 +30,8 @@ export const validators = {
   },
 
   password: (value) => {
-    if (!value || value.length < 6) {
-      return "Пароль должен быть минимум 6 символов";
+    if (!value || value.length < MIN_PASSWORD_LENGTH) {
+      return `Пароль должен быть минимум ${MIN_PASSWORD_LENGTH} символов`;
     }
     if (value.length > 128) {
       return "Пароль слишком длинный";
@@ -37,8 +43,8 @@ export const validators = {
     if (!value || value.trim().length === 0) {
       return "Сообщение не может быть пустым";
     }
-    if (value.trim().length > 1000) {
-      return "Сообщение слишком длинное (макс. 1000 символов)";
+    if (value.trim().length > MAX_MESSAGE_LENGTH) {
+      return `Сообщение слишком длинное (макс. ${MAX_MESSAGE_LENGTH} символов)`;
     }
     return null;
   },

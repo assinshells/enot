@@ -1,7 +1,3 @@
-/**
- * Shared Lib: useAuth hook
- * Путь: src/shared/lib/hooks/useAuth.js
- */
 import { useContext } from "react";
 import { AuthContext } from "@/app/providers/AuthProvider";
 

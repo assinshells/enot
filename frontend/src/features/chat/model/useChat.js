@@ -1,18 +1,12 @@
-/**
- * Feature: useChat Hook
- * Путь: src/features/chat/model/useChat.js
- */
 import { useState, useEffect, useCallback, useRef } from "react";
 import { chatApi } from "@/entities/chat/api/chatApi";
 import { socketLib } from "@/shared/lib/socket/socket";
+import { ROOM_NAMES, DEFAULT_ROOM, isValidRoom } from "@/shared/config/rooms";
 
 export const useChat = () => {
-  const AVAILABLE_ROOMS = ["Главная", "Знакомства", "Беспредел"];
-  const DEFAULT_ROOM = "Главная";
-
   const getInitialRoom = () => {
     const stored = sessionStorage.getItem("initialRoom");
-    return stored && AVAILABLE_ROOMS.includes(stored) ? stored : DEFAULT_ROOM;
+    return stored && isValidRoom(stored) ? stored : DEFAULT_ROOM;
   };
 
   const [currentRoom, setCurrentRoom] = useState(getInitialRoom);
@@ -21,26 +15,20 @@ export const useChat = () => {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
-
-  // ✅ НОВОЕ: Список комнат и счётчики
   const [rooms, setRooms] = useState([]);
   const [counts, setCounts] = useState({});
 
-  // ✅ Ref для отмены запросов
   const abortControllerRef = useRef(null);
+  const isInitializedRef = useRef(false);
 
-  // ✅ Очищаем sessionStorage после первого использования
   useEffect(() => {
     sessionStorage.removeItem("initialRoom");
   }, []);
 
-  /**
-   * Загрузить историю комнаты
-   */
   const loadMessages = useCallback(async (room) => {
-    // Отменяем предыдущий запрос
-    abortControllerRef.current?.abort();
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
 
     const controller = new AbortController();
     abortControllerRef.current = controller;
@@ -53,16 +41,13 @@ export const useChat = () => {
         signal: controller.signal,
       });
 
-      // ✅ Проверяем, что запрос не отменён
       if (!controller.signal.aborted) {
         setMessages(response.data || []);
         setLoading(false);
       }
     } catch (err) {
-      // ✅ Правильная обработка отмены
       if (err.name === "CanceledError" || err.name === "AbortError") {
-        console.log("Request canceled for room:", room);
-        return; // Не меняем состояние
+        return;
       }
 
       if (!controller.signal.aborted) {
@@ -73,20 +58,15 @@ export const useChat = () => {
     }
   }, []);
 
-  /**
-   * Сменить комнату
-   */
   const changeRoom = useCallback(
     (newRoom) => {
-      if (newRoom === currentRoom) return;
+      if (newRoom === currentRoom || !isValidRoom(newRoom)) return;
 
       const socket = socketLib.getSocket();
       if (!socket) return;
 
       setLoading(true);
       let handled = false;
-
-      socket.emit("room:leave");
 
       const handleLeft = () => {
         if (handled) return;
@@ -97,6 +77,7 @@ export const useChat = () => {
         socket.off("room:left", handleLeft);
       };
 
+      socket.emit("room:leave");
       socket.once("room:left", handleLeft);
 
       setTimeout(() => {
@@ -109,23 +90,22 @@ export const useChat = () => {
     [currentRoom]
   );
 
-  /**
-   * Отправить сообщение
-   */
   const sendMessage = useCallback(
     async (text) => {
-      if (!text || text.trim().length === 0) {
+      const trimmedText = text.trim();
+
+      if (!trimmedText) {
         throw new Error("Сообщение не может быть пустым");
       }
 
-      if (text.trim().length > 1000) {
+      if (trimmedText.length > 1000) {
         throw new Error("Сообщение слишком длинное (макс. 1000 символов)");
       }
 
       try {
         setSending(true);
         setError(null);
-        await chatApi.sendMessage(text.trim(), currentRoom);
+        await chatApi.sendMessage(trimmedText, currentRoom);
       } catch (err) {
         console.error("Ошибка отправки сообщения:", err);
         setError(err.message);
@@ -137,33 +117,25 @@ export const useChat = () => {
     [currentRoom]
   );
 
-  // ========== SOCKET LISTENERS ==========
-
   useEffect(() => {
     const socket = socketLib.getSocket();
     if (!socket) return;
 
     const handleConnect = () => {
-      console.log("✅ Socket.IO подключен");
       setIsConnected(true);
-
-      // ✅ Автоматически входим в комнату по умолчанию
       socket.emit("room:join", { room: currentRoom });
     };
 
     const handleDisconnect = () => {
-      console.log("❌ Socket.IO отключен");
       setIsConnected(false);
     };
 
     const handleRoomJoined = ({ room, counts }) => {
-      console.log(`✅ Joined room "${room}"`);
       setCounts(counts);
 
-      // ✅ Загружаем только если еще не инициализированы
-      if (!isInitialized) {
+      if (!isInitializedRef.current) {
         loadMessages(room);
-        setIsInitialized(true);
+        isInitializedRef.current = true;
       }
     };
 
@@ -179,11 +151,9 @@ export const useChat = () => {
     };
 
     const handleNewMessage = (message) => {
-      // ✅ Принимаем сообщения ТОЛЬКО из текущей комнаты
       if (message.room !== currentRoom) return;
 
       setMessages((prev) => {
-        // ✅ Предотвращаем дублирование
         if (prev.some((m) => m._id === message._id)) return prev;
         return [...prev, message];
       });
@@ -202,7 +172,6 @@ export const useChat = () => {
     socket.on("message:new", handleNewMessage);
     socket.on("error", handleError);
 
-    // ✅ Если уже подключены, входим в комнату
     if (socket.connected) {
       handleConnect();
     }
@@ -215,6 +184,10 @@ export const useChat = () => {
       socket.off("room:counts", handleRoomCounts);
       socket.off("message:new", handleNewMessage);
       socket.off("error", handleError);
+
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
     };
   }, [currentRoom, loadMessages]);
 
@@ -227,6 +200,7 @@ export const useChat = () => {
     isConnected,
     rooms,
     counts,
+    availableRooms: ROOM_NAMES,
     sendMessage,
     changeRoom,
   };

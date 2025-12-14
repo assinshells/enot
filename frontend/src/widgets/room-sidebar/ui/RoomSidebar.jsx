@@ -1,104 +1,91 @@
-// frontend/src/widgets/room-sidebar/ui/RoomSidebar.jsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, memo } from "react";
 import { socketLib } from "@/shared/lib/socket/socket";
 import "./RoomSidebar.css";
+
+const RoomItem = memo(({ room, count, isActive, onClick }) => (
+  <li
+    className={`list-group-item list-group-item-action d-flex justify-content-between align-items-center ${
+      isActive ? "active" : ""
+    }`}
+    onClick={onClick}
+    style={{ cursor: "pointer" }}
+  >
+    <span className="d-flex align-items-center">
+      <i className="bi bi-chat-dots me-2"></i>
+      <strong>{room}</strong>
+    </span>
+    <span
+      className={`badge rounded-pill ${
+        isActive ? "bg-light text-dark" : "bg-primary"
+      }`}
+    >
+      {count}
+    </span>
+  </li>
+));
+
+RoomItem.displayName = "RoomItem";
 
 export const RoomSidebar = ({ currentRoom, onRoomChange }) => {
   const [rooms, setRooms] = useState([]);
   const [counts, setCounts] = useState({});
-  const [totalUsers, setTotalUsers] = useState(0);
+
+  const totalUsers = useMemo(() => {
+    return Object.values(counts).reduce((sum, count) => sum + count, 0);
+  }, [counts]);
 
   useEffect(() => {
     const socket = socketLib.getSocket();
     if (!socket) return;
 
-    // Запрашиваем список комнат
     socket.emit("room:list");
 
-    // Слушаем список комнат
-    socket.on("room:list", (data) => {
+    const handleRoomList = (data) => {
       setRooms(data);
-      updateCounts(data);
-    });
-
-    // Слушаем обновления счётчиков
-    socket.on("room:counts", (data) => {
+      const newCounts = {};
+      data.forEach((r) => (newCounts[r.name] = r.count));
+      setCounts(newCounts);
+    };
+    const handleRoomCounts = (data) => {
       setCounts(data);
-      calculateTotal(data);
-    });
+    };
+
+    socket.on("room:list", handleRoomList);
+    socket.on("room:counts", handleRoomCounts);
 
     return () => {
-      socket.off("room:list");
-      socket.off("room:counts");
+      socket.off("room:list", handleRoomList);
+      socket.off("room:counts", handleRoomCounts);
     };
   }, []);
-
-  const updateCounts = (roomList) => {
-    const newCounts = {};
-    let total = 0;
-    roomList.forEach((r) => {
-      newCounts[r.name] = r.count;
-      total += r.count;
-    });
-    setCounts(newCounts);
-    setTotalUsers(total);
-  };
-
-  const calculateTotal = (countData) => {
-    const total = Object.values(countData).reduce(
-      (sum, count) => sum + count,
-      0
-    );
-    setTotalUsers(total);
-  };
-
   const handleRoomClick = (roomName) => {
-    if (roomName === currentRoom) return;
-    onRoomChange(roomName);
+    if (roomName !== currentRoom) {
+      onRoomChange(roomName);
+    }
   };
-
   return (
     <aside className="room-sidebar border-start">
-      {/* Заголовок с общим счётчиком */}
       <div className="p-3 border-bottom">
         <h5 className="mb-0 d-flex align-items-center">
           <i className="bi bi-people-fill me-2 text-primary"></i>В чате:{" "}
           {totalUsers}
         </h5>
       </div>
-
-      {/* Список комнат */}
       <div className="p-3">
         <h6 className="text-muted mb-3">Комнаты</h6>
         <ul className="list-group">
           {rooms.map((room) => (
-            <li
+            <RoomItem
               key={room.name}
-              className={`list-group-item list-group-item-action d-flex justify-content-between align-items-center ${
-                currentRoom === room.name ? "active" : ""
-              }`}
+              room={room.name}
+              count={counts[room.name] || 0}
+              isActive={currentRoom === room.name}
               onClick={() => handleRoomClick(room.name)}
-              style={{ cursor: "pointer" }}
-            >
-              <span className="d-flex align-items-center">
-                <i className="bi bi-chat-dots me-2"></i>
-                <strong>{room.name}</strong>
-              </span>
-              <span
-                className={`badge rounded-pill ${
-                  currentRoom === room.name
-                    ? "bg-light text-dark"
-                    : "bg-primary"
-                }`}
-              >
-                {counts[room.name] || 0}
-              </span>
-            </li>
+            />
           ))}
         </ul>
       </div>
 
-      {/* Легенда */}
       <div className="p-3 border-top mt-auto">
         <small className="text-muted d-block">
           <i className="bi bi-info-circle me-1"></i>
