@@ -5,19 +5,14 @@
 import Message from "../models/messageModel.js";
 import logger from "../config/logger.js";
 
-/**
- * @desc    Получить последние 100 сообщений
- * @route   GET /api/chat/messages
- * @access  Private
- */
 export const getMessages = async (req, res, next) => {
   try {
     const messages = await Message.find()
       .sort({ createdAt: -1 })
       .limit(100)
-      .lean();
+      .lean()
+      .select("-__v"); // Оптимизация: не возвращаем __v
 
-    // Реверсируем для правильного порядка (старые -> новые)
     const orderedMessages = messages.reverse();
 
     logger.info(`Получено ${orderedMessages.length} сообщений`);
@@ -26,26 +21,11 @@ export const getMessages = async (req, res, next) => {
       success: true,
       data: orderedMessages,
     });
-    // Отправка через Socket.IO всем подключенным
-    const io = await import("../services/socketService.js").then((m) =>
-      m.getIO()
-    );
-    io.emit("message:new", message);
-
-    return res.status(201).json({
-      success: true,
-      data: message,
-    });
   } catch (error) {
     next(error);
   }
 };
 
-/**
- * @desc    Создать сообщение
- * @route   POST /api/chat/messages
- * @access  Private
- */
 export const createMessage = async (req, res, next) => {
   try {
     const { text } = req.body;
@@ -57,6 +37,14 @@ export const createMessage = async (req, res, next) => {
       });
     }
 
+    // Проверка длины
+    if (text.trim().length > 1000) {
+      return res.status(400).json({
+        success: false,
+        message: "Сообщение слишком длинное (макс. 1000 символов)",
+      });
+    }
+
     const message = await Message.create({
       user: req.user._id,
       nickname: req.user.nickname,
@@ -65,11 +53,19 @@ export const createMessage = async (req, res, next) => {
 
     logger.info(`Сообщение создано: ${message._id} от ${req.user.nickname}`);
 
-    // Отправка через Socket.IO всем подключенным
+    // Отправка через Socket.IO
     const io = await import("../services/socketService.js").then((m) =>
       m.getIO()
     );
-    io.emit("message:new", message);
+
+    // ✅ Отправляем только необходимые данные
+    io.emit("message:new", {
+      _id: message._id,
+      user: message.user,
+      nickname: message.nickname,
+      text: message.text,
+      createdAt: message.createdAt,
+    });
 
     return res.status(201).json({
       success: true,
