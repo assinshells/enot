@@ -5,23 +5,53 @@ import mailService from "../services/mailService.js";
 import logger from "../config/logger.js";
 
 /**
- * @desc    Регистрация пользователя
+ * @desc    Проверка существования пользователя
+ * @route   POST /api/auth/check-user
+ * @access  Public
+ */
+export const checkUser = async (req, res, next) => {
+  try {
+    const { nickname } = req.body;
+
+    const user = await User.findOne({ nickname });
+
+    res.json({
+      success: true,
+      exists: !!user,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Регистрация нового пользователя (с email и капчей)
  * @route   POST /api/auth/register
  * @access  Public
  */
 export const register = async (req, res, next) => {
   try {
-    const { nickname, email, password } = req.body;
+    const { nickname, email, password, captchaToken } = req.body;
+
+    // В production проверяем капчу
+    if (process.env.NODE_ENV === "production") {
+      // TODO: Добавить проверку капчи с внешним сервисом
+      // Например, с Google reCAPTCHA или hCaptcha
+      if (!captchaToken) {
+        return res.status(400).json({
+          success: false,
+          message: "Требуется пройти проверку капчи",
+        });
+      }
+    }
 
     // Проверка существования пользователя
-    const userExists = await User.findOne({
-      $or: [{ nickname }, ...(email ? [{ email }] : [])],
-    });
+    const userExists = await User.findOne({ nickname });
 
     if (userExists) {
       return res.status(400).json({
         success: false,
-        message: "Пользователь с таким никнеймом или email уже существует",
+        message: "Пользователь с таким никнеймом уже существует",
       });
     }
 
@@ -30,6 +60,7 @@ export const register = async (req, res, next) => {
       nickname,
       email: email || undefined,
       password,
+      isNewUser: true,
     });
 
     logger.info(`Новый пользователь зарегистрирован: ${nickname}`);
@@ -40,6 +71,8 @@ export const register = async (req, res, next) => {
         _id: user._id,
         nickname: user.nickname,
         email: user.email,
+        color: user.color,
+        isNewUser: user.isNewUser,
         token: generateToken(user._id),
       },
     });
@@ -55,21 +88,16 @@ export const register = async (req, res, next) => {
  */
 export const login = async (req, res, next) => {
   try {
-    const { login, password } = req.body;
+    const { nickname, password } = req.body;
 
-    // Поиск пользователя по никнейму или email
-    const user = await User.findOne({
-      $or: [
-        { nickname: String(login) }, // Защита от NoSQL injection
-        { email: login },
-      ],
-    }).select("+password");
+    // Поиск пользователя по никнейму
+    const user = await User.findOne({ nickname }).select("+password");
 
     if (!user) {
-      logger.warn(`Неудачная попытка входа: ${login}`);
-      return res.status(401).json({
+      logger.warn(`Пользователь не найден: ${nickname}`);
+      return res.status(404).json({
         success: false,
-        message: "Неверный логин или пароль",
+        message: "user_not_found",
       });
     }
 
@@ -77,10 +105,10 @@ export const login = async (req, res, next) => {
     const isMatch = await user.matchPassword(password);
 
     if (!isMatch) {
-      logger.warn(`Неверный пароль для пользователя: ${login}`);
+      logger.warn(`Неверный пароль для пользователя: ${nickname}`);
       return res.status(401).json({
         success: false,
-        message: "Неверный логин или пароль",
+        message: "Неверный пароль",
       });
     }
 
@@ -92,8 +120,32 @@ export const login = async (req, res, next) => {
         _id: user._id,
         nickname: user.nickname,
         email: user.email,
+        color: user.color,
+        isNewUser: user.isNewUser,
         token: generateToken(user._id),
       },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Установить флаг isNewUser в false
+ * @route   POST /api/auth/mark-user-seen
+ * @access  Private
+ */
+export const markUserSeen = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (user.isNewUser) {
+      user.isNewUser = false;
+      await user.save();
+    }
+
+    res.json({
+      success: true,
     });
   } catch (error) {
     next(error);
@@ -124,13 +176,13 @@ export const forgotPassword = async (req, res, next) => {
 
     // Сохранение токена и времени истечения (10 минут)
     user.resetPasswordToken = hashedToken;
-    user.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // 10 минут
+    user.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
     await user.save();
 
     // URL для сброса пароля
     const resetUrl = `${process.env.CORS_ORIGIN}/reset-password/${resetToken}`;
 
-    // Отправка email (в DEV логируется в консоль)
+    // Отправка email
     await mailService.sendPasswordReset(email, resetUrl);
 
     logger.info(`Запрос восстановления пароля для: ${email}`);

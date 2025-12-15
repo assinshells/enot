@@ -1,13 +1,9 @@
-/**
- * App: Router
- * Путь: src/app/router/AppRouter.jsx
- */
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/shared/lib/hooks/useAuth";
 import { Spinner } from "@/shared/ui";
 import {
   LoginPage,
-  RegisterPage,
+  EmailConfirmationPage,
   ForgotPasswordPage,
   ResetPasswordPage,
   ChatPage,
@@ -65,14 +61,7 @@ export const AppRouter = () => {
             </PublicRoute>
           }
         />
-        <Route
-          path="/register"
-          element={
-            <PublicRoute>
-              <RegisterPage />
-            </PublicRoute>
-          }
-        />
+        <Route path="/email-confirmation" element={<EmailConfirmationPage />} />
         <Route
           path="/forgot-password"
           element={

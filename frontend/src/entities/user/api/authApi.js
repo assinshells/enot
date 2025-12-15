@@ -1,11 +1,12 @@
-/**
- * Entity: Auth API
- * Путь: src/entities/user/api/authApi.js
- */
 import { request } from "@/shared/api/request";
 
 export const authApi = {
-  // Регистрация
+  // Проверка существования пользователя
+  checkUser: async (nickname) => {
+    return request.post("/auth/check-user", { nickname });
+  },
+
+  // Регистрация с email и капчей
   register: async (data) => {
     return request.post("/auth/register", data);
   },
@@ -13,6 +14,11 @@ export const authApi = {
   // Авторизация
   login: async (data) => {
     return request.post("/auth/login", data);
+  },
+
+  // Пометить пользователя как не нового
+  markUserSeen: async () => {
+    return request.post("/auth/mark-user-seen");
   },
 
   // Восстановление пароля

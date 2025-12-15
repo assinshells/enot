@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useRegisterForm } from "../model/useRegisterForm";
-import { Input, Button, Alert, Card, ColorPicker } from "@/shared/ui";
+import { Input, Button, Alert, Card } from "@/shared/ui";
 
 export const RegisterForm = () => {
   const {

@@ -28,6 +28,10 @@ const userSchema = new mongoose.Schema(
       enum: ["black", "blue", "green", "orange"],
       default: "black",
     },
+    isNewUser: {
+      type: Boolean,
+      default: true,
+    },
     resetPasswordToken: String,
     resetPasswordExpire: Date,
   },

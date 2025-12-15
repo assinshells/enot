@@ -1,18 +1,65 @@
-import { Link } from "react-router-dom";
-import { useLoginForm } from "../model/useLoginForm";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/shared/lib/hooks/useAuth";
+import { useRoomForm } from "@/shared/lib/hooks/useRoomForm";
+import { roomUtils } from "@/shared/lib/utils/roomUtils";
+import { authApi } from "@/entities/user";
 import { Input, Button, Alert, Card } from "@/shared/ui";
 
 export const LoginForm = () => {
-  const {
-    formData,
-    error,
-    loading,
-    selectedRoom,
-    availableRooms,
-    handleChange,
-    handleRoomChange,
-    handleSubmit,
-  } = useLoginForm();
+  const navigate = useNavigate();
+  const { loginUser } = useAuth();
+  const { selectedRoom, setSelectedRoom, availableRooms, validateRoom } =
+    useRoomForm();
+
+  const [formData, setFormData] = useState({
+    nickname: "",
+    password: "",
+  });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    const roomError = validateRoom();
+    if (roomError) {
+      setError(roomError);
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Пытаемся войти
+      const response = await loginUser(formData);
+      roomUtils.saveRoom(selectedRoom);
+      navigate("/");
+    } catch (err) {
+      // Если ошибка "user_not_found" - переходим на страницу email confirmation
+      if (err.message === "user_not_found") {
+        navigate("/email-confirmation", {
+          state: {
+            nickname: formData.nickname,
+            password: formData.password,
+            room: selectedRoom,
+          },
+        });
+      } else {
+        setError(err.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Card>
@@ -20,9 +67,9 @@ export const LoginForm = () => {
 
       <form onSubmit={handleSubmit}>
         <Input
-          name="login"
-          placeholder="Никнейм или Email"
-          value={formData.login}
+          name="nickname"
+          placeholder="Никнейм"
+          value={formData.nickname}
           onChange={handleChange}
           required
         />
@@ -41,10 +88,10 @@ export const LoginForm = () => {
             id="room"
             name="room"
             value={selectedRoom}
-            onChange={(e) => handleRoomChange(e.target.value)}
+            onChange={(e) => setSelectedRoom(e.target.value)}
             required
           >
-            <option value="" disabled selected>
+            <option value="" disabled>
               Выберите комнату...
             </option>
             {availableRooms.map((room) => (
@@ -54,14 +101,8 @@ export const LoginForm = () => {
             ))}
           </select>
           <small className="text-muted">
-            Вы войдёте в выбранную комнату после авторизации
+            Вы войдёте в выбранную комнату после входа
           </small>
-        </div>
-
-        <div className="mb-3">
-          <Link to="/forgot-password" className="text-decoration-none">
-            Забыли пароль?
-          </Link>
         </div>
 
         <Button type="submit" loading={loading} fullWidth>
@@ -70,8 +111,8 @@ export const LoginForm = () => {
       </form>
 
       <div className="text-center mt-3">
-        <p className="mb-0">
-          Нет аккаунта? <Link to="/register">Зарегистрироваться</Link>
+        <p className="text-muted mb-0">
+          Новый пользователь? Просто введите никнейм и пароль
         </p>
       </div>
     </Card>
