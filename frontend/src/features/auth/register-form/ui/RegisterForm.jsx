@@ -1,7 +1,3 @@
-/**
- * Feature: Register Form UI
- * Путь: src/features/auth/register-form/ui/RegisterForm.jsx
- */
 import { Link } from "react-router-dom";
 import { useRegisterForm } from "../model/useRegisterForm";
 import { Input, Button, Alert, Card } from "@/shared/ui";
@@ -11,9 +7,11 @@ export const RegisterForm = () => {
     formData,
     error,
     loading,
-    handleChange,
-    handleSubmit,
+    selectedRoom,
     availableRooms,
+    handleChange,
+    handleRoomChange,
+    handleSubmit,
   } = useRegisterForm();
 
   return (
@@ -50,7 +48,6 @@ export const RegisterForm = () => {
           minLength={6}
         />
 
-        {/* ✅ НОВОЕ: Выбор комнаты */}
         <div className="mb-3">
           <label htmlFor="room" className="form-label">
             Комната
@@ -59,8 +56,8 @@ export const RegisterForm = () => {
             className="form-select"
             id="room"
             name="room"
-            value={formData.room}
-            onChange={handleChange}
+            value={selectedRoom}
+            onChange={(e) => handleRoomChange(e.target.value)}
             required
           >
             <option value="">Выберите комнату...</option>

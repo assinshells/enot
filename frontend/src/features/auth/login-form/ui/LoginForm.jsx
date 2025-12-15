@@ -1,7 +1,3 @@
-/**
- * Feature: Login Form UI
- * Путь: src/features/auth/login-form/ui/LoginForm.jsx
- */
 import { Link } from "react-router-dom";
 import { useLoginForm } from "../model/useLoginForm";
 import { Input, Button, Alert, Card } from "@/shared/ui";
@@ -11,9 +7,11 @@ export const LoginForm = () => {
     formData,
     error,
     loading,
-    handleChange,
-    handleSubmit,
+    selectedRoom,
     availableRooms,
+    handleChange,
+    handleRoomChange,
+    handleSubmit,
   } = useLoginForm();
 
   return (
@@ -38,7 +36,6 @@ export const LoginForm = () => {
           required
         />
 
-        {/* ✅ НОВОЕ: Выбор комнаты */}
         <div className="mb-3">
           <label htmlFor="room" className="form-label">
             Комната
@@ -47,8 +44,8 @@ export const LoginForm = () => {
             className="form-select"
             id="room"
             name="room"
-            value={formData.room}
-            onChange={handleChange}
+            value={selectedRoom}
+            onChange={(e) => handleRoomChange(e.target.value)}
             required
           >
             <option value="">Выберите комнату...</option>

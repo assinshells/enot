@@ -1,15 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { chatApi } from "@/entities/chat/api/chatApi";
 import { socketLib } from "@/shared/lib/socket/socket";
-import { ROOM_NAMES, DEFAULT_ROOM, isValidRoom } from "@/shared/config/rooms";
+import { roomUtils } from "@/shared/lib/utils/roomUtils";
+import { ROOM_NAMES } from "@/shared/config/rooms";
 
 export const useChat = () => {
-  const getInitialRoom = () => {
-    const stored = sessionStorage.getItem("initialRoom");
-    return stored && isValidRoom(stored) ? stored : DEFAULT_ROOM;
-  };
-
-  const [currentRoom, setCurrentRoom] = useState(getInitialRoom);
+  const [currentRoom, setCurrentRoom] = useState(roomUtils.getInitialRoom);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
@@ -20,9 +16,10 @@ export const useChat = () => {
 
   const abortControllerRef = useRef(null);
   const isInitializedRef = useRef(false);
+  const isChangingRoomRef = useRef(false);
 
   useEffect(() => {
-    sessionStorage.removeItem("initialRoom");
+    roomUtils.clearRoom();
   }, []);
 
   const loadMessages = useCallback(async (room) => {
@@ -43,7 +40,6 @@ export const useChat = () => {
 
       if (!controller.signal.aborted) {
         setMessages(response.data || []);
-        setLoading(false);
       }
     } catch (err) {
       if (err.name === "CanceledError" || err.name === "AbortError") {
@@ -53,6 +49,9 @@ export const useChat = () => {
       if (!controller.signal.aborted) {
         console.error("Error loading messages:", err);
         setError(err.message);
+      }
+    } finally {
+      if (!controller.signal.aborted) {
         setLoading(false);
       }
     }
@@ -60,32 +59,33 @@ export const useChat = () => {
 
   const changeRoom = useCallback(
     (newRoom) => {
-      if (newRoom === currentRoom || !isValidRoom(newRoom)) return;
+      if (newRoom === currentRoom || !ROOM_NAMES.includes(newRoom)) {
+        return;
+      }
+
+      if (isChangingRoomRef.current) {
+        console.warn("Room change already in progress");
+        return;
+      }
 
       const socket = socketLib.getSocket();
-      if (!socket) return;
+      if (!socket || !socket.connected) {
+        console.error("Socket not connected");
+        return;
+      }
 
+      isChangingRoomRef.current = true;
       setLoading(true);
-      let handled = false;
+      setMessages([]);
 
-      const handleLeft = () => {
-        if (handled) return;
-        handled = true;
-        setMessages([]);
+      // Сначала выходим из текущей комнаты
+      socket.emit("room:leave");
+
+      // Затем меняем состояние и входим в новую
+      setTimeout(() => {
         setCurrentRoom(newRoom);
         socket.emit("room:join", { room: newRoom });
-        socket.off("room:left", handleLeft);
-      };
-
-      socket.emit("room:leave");
-      socket.once("room:left", handleLeft);
-
-      setTimeout(() => {
-        if (!handled) {
-          console.warn("Server didn't respond, forcing room change");
-          handleLeft();
-        }
-      }, 3000);
+      }, 50);
     },
     [currentRoom]
   );
@@ -122,21 +122,32 @@ export const useChat = () => {
     if (!socket) return;
 
     const handleConnect = () => {
+      console.log("✅ Socket connected");
       setIsConnected(true);
-      socket.emit("room:join", { room: currentRoom });
+
+      if (!isChangingRoomRef.current) {
+        socket.emit("room:join", { room: currentRoom });
+      }
     };
 
     const handleDisconnect = () => {
+      console.log("❌ Socket disconnected");
       setIsConnected(false);
+      isInitializedRef.current = false;
     };
 
     const handleRoomJoined = ({ room, counts }) => {
+      console.log(`✅ Joined room: ${room}`);
       setCounts(counts);
+      isChangingRoomRef.current = false;
 
-      if (!isInitializedRef.current) {
-        loadMessages(room);
-        isInitializedRef.current = true;
-      }
+      // Загружаем сообщения для комнаты, в которую вошли
+      loadMessages(room);
+      isInitializedRef.current = true;
+    };
+
+    const handleRoomLeft = () => {
+      console.log(`❌ Left current room`);
     };
 
     const handleRoomList = (data) => {
@@ -162,11 +173,14 @@ export const useChat = () => {
     const handleError = (error) => {
       console.error("Socket.IO ошибка:", error);
       setError(error.message);
+      isChangingRoomRef.current = false;
+      setLoading(false);
     };
 
     socket.on("connect", handleConnect);
     socket.on("disconnect", handleDisconnect);
     socket.on("room:joined", handleRoomJoined);
+    socket.on("room:left", handleRoomLeft);
     socket.on("room:list", handleRoomList);
     socket.on("room:counts", handleRoomCounts);
     socket.on("message:new", handleNewMessage);
@@ -180,6 +194,7 @@ export const useChat = () => {
       socket.off("connect", handleConnect);
       socket.off("disconnect", handleDisconnect);
       socket.off("room:joined", handleRoomJoined);
+      socket.off("room:left", handleRoomLeft);
       socket.off("room:list", handleRoomList);
       socket.off("room:counts", handleRoomCounts);
       socket.off("message:new", handleNewMessage);

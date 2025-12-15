@@ -1,4 +1,4 @@
-import { useEffect, useRef, memo } from "react";
+import { useEffect, useRef, memo, useMemo } from "react";
 import { formatTime } from "@/shared/lib/utils/formatTime";
 import { useAuth } from "@/shared/lib/hooks/useAuth";
 import "./ChatMessages.css";
@@ -19,40 +19,52 @@ const MessageItem = memo(({ message, isOwn }) => (
 
 MessageItem.displayName = "MessageItem";
 
+const LoadingSpinner = () => (
+  <div className="d-flex justify-content-center align-items-center h-100">
+    <div className="spinner-border text-primary" role="status">
+      <span className="visually-hidden">Загрузка...</span>
+    </div>
+  </div>
+);
+
+const EmptyState = () => (
+  <div className="d-flex justify-content-center align-items-center h-100">
+    <p className="text-muted">Нет сообщений. Начните общение!</p>
+  </div>
+);
+
 export const ChatMessages = ({ messages, loading }) => {
   const { user } = useAuth();
   const messagesEndRef = useRef(null);
 
+  const messageList = useMemo(() => {
+    if (!messages || messages.length === 0) return [];
+    return messages.map((message) => ({
+      ...message,
+      isOwn: message.user === user?._id,
+    }));
+  }, [messages, user?._id]);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messageList]);
 
   if (loading) {
-    return (
-      <div className="chat-messages-loading">
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Загрузка...</span>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
-  if (!messages || messages.length === 0) {
-    return (
-      <div className="chat-messages-empty">
-        <p className="text-muted">Нет сообщений. Начните общение!</p>
-      </div>
-    );
+  if (messageList.length === 0) {
+    return <EmptyState />;
   }
 
   return (
     <div className="chat-messages">
       <ul className="chat-conversation list-unstyled mb-0">
-        {messages.map((message) => (
+        {messageList.map((message) => (
           <MessageItem
             key={message._id}
             message={message}
-            isOwn={message.user === user?._id}
+            isOwn={message.isOwn}
           />
         ))}
       </ul>

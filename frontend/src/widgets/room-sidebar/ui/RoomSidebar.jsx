@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, memo } from "react";
+import { useState, useEffect, useMemo, memo, useCallback } from "react";
 import { socketLib } from "@/shared/lib/socket/socket";
 import "./RoomSidebar.css";
 
@@ -34,11 +34,18 @@ export const RoomSidebar = ({ currentRoom, onRoomChange }) => {
     return Object.values(counts).reduce((sum, count) => sum + count, 0);
   }, [counts]);
 
+  const handleRoomClick = useCallback(
+    (roomName) => {
+      if (roomName !== currentRoom) {
+        onRoomChange(roomName);
+      }
+    },
+    [currentRoom, onRoomChange]
+  );
+
   useEffect(() => {
     const socket = socketLib.getSocket();
     if (!socket) return;
-
-    socket.emit("room:list");
 
     const handleRoomList = (data) => {
       setRooms(data);
@@ -46,10 +53,12 @@ export const RoomSidebar = ({ currentRoom, onRoomChange }) => {
       data.forEach((r) => (newCounts[r.name] = r.count));
       setCounts(newCounts);
     };
+
     const handleRoomCounts = (data) => {
       setCounts(data);
     };
 
+    socket.emit("room:list");
     socket.on("room:list", handleRoomList);
     socket.on("room:counts", handleRoomCounts);
 
@@ -58,11 +67,7 @@ export const RoomSidebar = ({ currentRoom, onRoomChange }) => {
       socket.off("room:counts", handleRoomCounts);
     };
   }, []);
-  const handleRoomClick = (roomName) => {
-    if (roomName !== currentRoom) {
-      onRoomChange(roomName);
-    }
-  };
+
   return (
     <aside className="room-sidebar border-start">
       <div className="p-3 border-bottom">

@@ -1,17 +1,19 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/shared/lib/hooks/useAuth";
-import { ROOM_NAMES, DEFAULT_ROOM, isValidRoom } from "@/shared/config/rooms";
+import { useRoomForm } from "@/shared/lib/hooks/useRoomForm";
+import { roomUtils } from "@/shared/lib/utils/roomUtils";
 
 export const useRegisterForm = () => {
   const navigate = useNavigate();
   const { registerUser } = useAuth();
+  const { selectedRoom, setSelectedRoom, availableRooms, validateRoom } =
+    useRoomForm();
 
   const [formData, setFormData] = useState({
     nickname: "",
     email: "",
     password: "",
-    room: DEFAULT_ROOM,
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,21 +29,17 @@ export const useRegisterForm = () => {
     e.preventDefault();
     setError("");
 
-    if (!formData.room || !isValidRoom(formData.room)) {
-      setError("Выберите корректную комнату");
+    const roomError = validateRoom();
+    if (roomError) {
+      setError(roomError);
       return;
     }
 
     setLoading(true);
 
     try {
-      await registerUser({
-        nickname: formData.nickname,
-        email: formData.email,
-        password: formData.password,
-      });
-
-      sessionStorage.setItem("initialRoom", formData.room);
+      await registerUser(formData);
+      roomUtils.saveRoom(selectedRoom);
       navigate("/");
     } catch (err) {
       setError(err.message);
@@ -54,8 +52,10 @@ export const useRegisterForm = () => {
     formData,
     error,
     loading,
-    availableRooms: ROOM_NAMES,
+    selectedRoom,
+    availableRooms,
     handleChange,
+    handleRoomChange: setSelectedRoom,
     handleSubmit,
   };
 };
