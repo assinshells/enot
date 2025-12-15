@@ -11,7 +11,7 @@ export const ForgotPasswordForm = () => {
     useForgotPassword();
 
   return (
-    <Card title="Восстановление пароля">
+    <Card>
       {error && <Alert type="danger">{error}</Alert>}
       {message && <Alert type="success">{message}</Alert>}
 

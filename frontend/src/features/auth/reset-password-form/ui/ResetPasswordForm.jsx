@@ -18,7 +18,7 @@ export const ResetPasswordForm = () => {
   } = useResetPassword();
 
   return (
-    <Card title="Новый пароль">
+    <Card>
       {error && <Alert type="danger">{error}</Alert>}
 
       <form onSubmit={handleSubmit}>

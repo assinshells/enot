@@ -14,6 +14,12 @@ body {
 .no-caret::after {
   display: none !important;
 }
+.form-select {
+  appearance: none;
+  -webkit-appearance: none; /* Chrome, Safari */
+  -moz-appearance: none; /* Firefox */
+  background-image: none;
+}
 .dropdown-item:active,
 .dropdown-item:hover,
 .dropdown-item:focus,

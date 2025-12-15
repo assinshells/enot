@@ -15,7 +15,7 @@ export const RegisterForm = () => {
   } = useRegisterForm();
 
   return (
-    <Card title="Регистрация">
+    <Card>
       {error && <Alert type="danger">{error}</Alert>}
 
       <form onSubmit={handleSubmit}>
@@ -49,9 +49,6 @@ export const RegisterForm = () => {
         />
 
         <div className="mb-3">
-          <label htmlFor="room" className="form-label">
-            Комната
-          </label>
           <select
             className="form-select"
             id="room"
@@ -60,7 +57,9 @@ export const RegisterForm = () => {
             onChange={(e) => handleRoomChange(e.target.value)}
             required
           >
-            <option value="">Выберите комнату...</option>
+            <option value="" disabled selected>
+              Выберите комнату...
+            </option>
             {availableRooms.map((room) => (
               <option key={room} value={room}>
                 {room}

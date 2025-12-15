@@ -15,7 +15,7 @@ export const LoginForm = () => {
   } = useLoginForm();
 
   return (
-    <Card title="Вход">
+    <Card>
       {error && <Alert type="danger">{error}</Alert>}
 
       <form onSubmit={handleSubmit}>
@@ -26,7 +26,6 @@ export const LoginForm = () => {
           onChange={handleChange}
           required
         />
-
         <Input
           type="password"
           name="password"
@@ -37,18 +36,17 @@ export const LoginForm = () => {
         />
 
         <div className="mb-3">
-          <label htmlFor="room" className="form-label">
-            Комната
-          </label>
           <select
-            className="form-select"
+            className="form-select border-light bg-soft-light"
             id="room"
             name="room"
             value={selectedRoom}
             onChange={(e) => handleRoomChange(e.target.value)}
             required
           >
-            <option value="">Выберите комнату...</option>
+            <option value="" disabled selected>
+              Выберите комнату...
+            </option>
             {availableRooms.map((room) => (
               <option key={room} value={room}>
                 {room}

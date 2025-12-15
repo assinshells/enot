@@ -10,7 +10,7 @@ export const Button = ({
   fullWidth = false,
   loading = false,
   disabled = false,
-  className = "",
+  className = "d-block",
   onClick,
   ...props
 }) => {
