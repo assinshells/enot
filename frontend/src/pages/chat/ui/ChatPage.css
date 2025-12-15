@@ -52,3 +52,38 @@
     justify-content: flex-end;
   }
 }
+
+/*.layout-wrapper {
+  height: 100vh;
+  overflow: hidden;
+}
+
+.user-chat {
+  background-color: var(--bs-white);
+  box-shadow: 0 2px 4px rgba(15, 34, 58, 0.12);
+  transition: all 0.4s;
+  height: 100vh;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  height: 100%;
+}
+
+@media (max-width: 991.98px) {
+  .user-chat {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    visibility: hidden;
+    transform: translateX(100%);
+    z-index: 99;
+  }
+  .user-chat.user-chat-show {
+    visibility: visible;
+    transform: translateX(0);
+  }
+}*/

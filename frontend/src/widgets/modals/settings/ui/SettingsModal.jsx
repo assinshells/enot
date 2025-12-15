@@ -1,18 +1,25 @@
-/**
- * Widget: Settings Modal v2 (Pure React - без Bootstrap JS)
- * Путь: src/widgets/modals/settings/ui/SettingsModal.jsx
- */
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/shared/lib/hooks/useAuth";
+import { userApi } from "@/entities/user";
 import "./SettingsModal.css";
 
-export const SettingsModal = ({ isOpen, onClose }) => {
-  const { user } = useAuth();
+const COLOR_OPTIONS = [
+  { value: "black", label: "Черный", color: "#000000" },
+  { value: "blue", label: "Синий", color: "#0d6efd" },
+  { value: "green", label: "Зеленый", color: "#198754" },
+  { value: "orange", label: "Оранжевый", color: "#fd7e14" },
+];
 
-  // Блокировка скролла при открытии модального окна
+export const SettingsModal = ({ isOpen, onClose }) => {
+  const { user, setUser } = useAuth();
+  const [selectedColor, setSelectedColor] = useState(user?.color || "black");
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
+      setSelectedColor(user?.color || "black");
     } else {
       document.body.style.overflow = "unset";
     }
@@ -20,9 +27,8 @@ export const SettingsModal = ({ isOpen, onClose }) => {
     return () => {
       document.body.style.overflow = "unset";
     };
-  }, [isOpen]);
+  }, [isOpen, user?.color]);
 
-  // Закрытие по клавише Escape
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === "Escape" && isOpen) {
@@ -34,14 +40,29 @@ export const SettingsModal = ({ isOpen, onClose }) => {
     return () => document.removeEventListener("keydown", handleEscape);
   }, [isOpen, onClose]);
 
+  const handleColorChange = async (color) => {
+    setSelectedColor(color);
+    setSaving(true);
+    setMessage("");
+
+    try {
+      await userApi.updateColor(color);
+      setUser((prev) => ({ ...prev, color }));
+      setMessage("Цвет успешно изменен!");
+      setTimeout(() => setMessage(""), 2000);
+    } catch (error) {
+      setMessage("Ошибка при изменении цвета");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
     <>
-      {/* Backdrop */}
       <div className="modal-backdrop-custom" onClick={onClose} />
 
-      {/* Modal */}
       <div className="modal-custom">
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
@@ -58,6 +79,12 @@ export const SettingsModal = ({ isOpen, onClose }) => {
               ></button>
             </div>
             <div className="modal-body">
+              {message && (
+                <div className="alert alert-success" role="alert">
+                  {message}
+                </div>
+              )}
+
               <div className="mb-3">
                 <h6 className="text-muted mb-2">Профиль</h6>
                 <div className="card">
@@ -79,47 +106,35 @@ export const SettingsModal = ({ isOpen, onClose }) => {
               </div>
 
               <div className="mb-3">
-                <h6 className="text-muted mb-2">Уведомления</h6>
-                <div className="form-check form-switch">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id="notificationsSwitch"
-                    defaultChecked
-                  />
-                  <label
-                    className="form-check-label"
-                    htmlFor="notificationsSwitch"
-                  >
-                    Включить звуковые уведомления
-                  </label>
-                </div>
-              </div>
-
-              <div className="mb-3">
-                <h6 className="text-muted mb-2">Тема</h6>
-                <div className="form-check">
-                  <input
-                    className="form-check-input"
-                    type="radio"
-                    name="theme"
-                    id="lightTheme"
-                    defaultChecked
-                  />
-                  <label className="form-check-label" htmlFor="lightTheme">
-                    Светлая
-                  </label>
-                </div>
-                <div className="form-check">
-                  <input
-                    className="form-check-input"
-                    type="radio"
-                    name="theme"
-                    id="darkTheme"
-                  />
-                  <label className="form-check-label" htmlFor="darkTheme">
-                    Темная
-                  </label>
+                <h6 className="text-muted mb-2">Цвет никнейма</h6>
+                <div className="d-flex gap-2">
+                  {COLOR_OPTIONS.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      className={`btn ${
+                        selectedColor === option.value
+                          ? "btn-primary"
+                          : "btn-outline-secondary"
+                      }`}
+                      style={{
+                        flex: 1,
+                        backgroundColor:
+                          selectedColor === option.value
+                            ? option.color
+                            : "transparent",
+                        borderColor: option.color,
+                        color:
+                          selectedColor === option.value
+                            ? "#fff"
+                            : option.color,
+                      }}
+                      onClick={() => handleColorChange(option.value)}
+                      disabled={saving}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>

@@ -14,6 +14,7 @@ export const useRegisterForm = () => {
     nickname: "",
     email: "",
     password: "",
+    color: "black", // По умолчанию черный
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);

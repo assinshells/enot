@@ -1,7 +1,3 @@
-/**
- * Service: Socket.IO
- * Путь: backend/src/services/socketService.js
- */
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
 import User from "../models/userModel.js";
@@ -30,6 +26,7 @@ export const initSocket = (server) => {
 
       socket.userId = user._id.toString();
       socket.nickname = user.nickname;
+      socket.userColor = user.color || "black";
       next();
     } catch (error) {
       logger.error("Socket auth error:", error);
@@ -42,80 +39,74 @@ export const initSocket = (server) => {
 
     // ========== ROOM EVENTS ==========
 
-    /**
-     * Присоединиться к комнате
-     */
-    socket.on("room:join", ({ room }) => {
+    socket.on("room:join", async ({ room }) => {
       try {
         const counts = roomManager.joinRoom(socket, socket.userId, room);
 
-        // Отправляем клиенту подтверждение
         socket.emit("room:joined", { room, counts });
 
-        // Уведомляем всех в комнате о новом участнике
         socket.to(room).emit("room:user-joined", {
           userId: socket.userId,
           nickname: socket.nickname,
           counts,
         });
 
-        // Обновляем счётчики для всех
         io.emit("room:counts", counts);
+
+        // Отправляем список пользователей в комнате
+        const users = await getUsersInRoom(room);
+        io.to(room).emit("room:users", users);
       } catch (error) {
         socket.emit("error", { message: error.message });
       }
     });
 
-    /**
-     * Покинуть комнату
-     */
-    socket.on("room:leave", () => {
+    socket.on("room:leave", async () => {
       const room = roomManager.getUserRoom(socket.userId);
       if (!room) return;
 
       const counts = roomManager.leaveRoom(socket, socket.userId);
 
-      // Уведомляем комнату об уходе
       io.to(room).emit("room:user-left", {
         userId: socket.userId,
         nickname: socket.nickname,
         counts,
       });
 
-      // Обновляем счётчики
       io.emit("room:counts", counts);
+
+      // Обновляем список пользователей
+      const users = await getUsersInRoom(room);
+      io.to(room).emit("room:users", users);
     });
 
-    /**
-     * Получить список комнат
-     */
     socket.on("room:list", () => {
       socket.emit("room:list", roomManager.getAvailableRooms());
     });
 
     // ========== DISCONNECT ==========
 
-    socket.on("disconnect", () => {
+    socket.on("disconnect", async () => {
       const room = roomManager.getUserRoom(socket.userId);
 
       if (room) {
         const counts = roomManager.leaveRoom(socket, socket.userId);
 
-        // Уведомляем комнату
         io.to(room).emit("room:user-left", {
           userId: socket.userId,
           nickname: socket.nickname,
           counts,
         });
 
-        // Обновляем счётчики
         io.emit("room:counts", counts);
+
+        // Обновляем список пользователей
+        const users = await getUsersInRoom(room);
+        io.to(room).emit("room:users", users);
       }
 
       logger.info(`❌ ${socket.nickname} disconnected`);
     });
-
-    // ========== ERROR HANDLING ==========
 
     socket.on("error", (error) => {
       logger.error(`Socket error for ${socket.nickname}:`, error);
@@ -126,9 +117,18 @@ export const initSocket = (server) => {
   return io;
 };
 
-/**
- * Отправить сообщение в комнату
- */
+// Вспомогательная функция для получения пользователей в комнате
+async function getUsersInRoom(roomName) {
+  const sockets = await io.in(roomName).fetchSockets();
+  const userIds = sockets.map((s) => s.userId);
+
+  const users = await User.find({ _id: { $in: userIds } }).select(
+    "nickname color"
+  );
+
+  return users;
+}
+
 export const sendMessageToRoom = (roomName, event, data) => {
   if (!io) throw new Error("Socket.IO не инициализирован");
   io.to(roomName).emit(event, data);

@@ -12,6 +12,11 @@ const messageSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    userColor: {
+      type: String,
+      enum: ["black", "blue", "green", "orange"],
+      default: "black",
+    },
     room: {
       type: String,
       required: true,

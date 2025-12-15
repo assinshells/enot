@@ -53,22 +53,28 @@ export const ChatPage = () => {
     <>
       <div className="layout-wrapper d-lg-flex">
         <LeftSidebarMenu onOpenSettings={handleOpenSettings} />
-        <div className="user-chat w-100 overflow-hidden">
-          <div className="d-lg-flex">
-            <div className="w-100 overflow-hidden position-relative">
-              {localError && (
-                <div className="p-3">
-                  <Alert type="danger" onClose={handleCloseError}>
-                    {localError}
-                  </Alert>
-                </div>
-              )}
-              <ChatMessages messages={messages} loading={loading} />
+
+        <div className="user-chat w-100 overflow-hidden d-flex flex-column">
+          {localError && (
+            <div className="p-3">
+              <Alert type="danger" onClose={handleCloseError}>
+                {localError}
+              </Alert>
+            </div>
+          )}
+
+          <div className="d-flex flex-grow-1 overflow-hidden">
+            <div className="flex-grow-1 d-flex flex-column overflow-hidden">
+              <div className="flex-grow-1 overflow-auto">
+                <ChatMessages messages={messages} loading={loading} />
+              </div>
               <ChatInput onSendMessage={handleSendMessage} loading={sending} />
             </div>
+
             <RoomSidebar currentRoom={currentRoom} onRoomChange={changeRoom} />
           </div>
         </div>
+
         <SettingsModal isOpen={isSettingsOpen} onClose={handleCloseSettings} />
       </div>
     </>

@@ -1,7 +1,3 @@
-/**
- * Entity: User API
- * Путь: src/entities/user/api/userApi.js
- */
 import { request } from "@/shared/api/request";
 
 export const userApi = {
@@ -13,5 +9,10 @@ export const userApi = {
   // Обновить профиль
   updateProfile: async (data) => {
     return request.put("/users/profile", data);
+  },
+
+  // Обновить цвет
+  updateColor: async (color) => {
+    return request.put("/users/profile", { color });
   },
 };

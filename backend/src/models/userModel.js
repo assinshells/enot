@@ -23,6 +23,11 @@ const userSchema = new mongoose.Schema(
       minlength: [6, "Пароль должен быть минимум 6 символов"],
       select: false,
     },
+    color: {
+      type: String,
+      enum: ["black", "blue", "green", "orange"],
+      default: "black",
+    },
     resetPasswordToken: String,
     resetPasswordExpire: Date,
   },
