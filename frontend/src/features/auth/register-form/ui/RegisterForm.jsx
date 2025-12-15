@@ -1,13 +1,6 @@
 import { Link } from "react-router-dom";
 import { useRegisterForm } from "../model/useRegisterForm";
-import { Input, Button, Alert, Card } from "@/shared/ui";
-
-const COLOR_OPTIONS = [
-  { value: "black", label: "Черный", color: "#000000" },
-  { value: "blue", label: "Синий", color: "#0d6efd" },
-  { value: "green", label: "Зеленый", color: "#198754" },
-  { value: "orange", label: "Оранжевый", color: "#fd7e14" },
-];
+import { Input, Button, Alert, Card, ColorPicker } from "@/shared/ui";
 
 export const RegisterForm = () => {
   const {
@@ -54,40 +47,6 @@ export const RegisterForm = () => {
           required
           minLength={6}
         />
-
-        <div className="mb-3">
-          <label className="form-label">Цвет никнейма</label>
-          <div className="d-flex gap-2">
-            {COLOR_OPTIONS.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                className={`btn ${
-                  formData.color === option.value
-                    ? "btn-primary"
-                    : "btn-outline-secondary"
-                }`}
-                style={{
-                  flex: 1,
-                  backgroundColor:
-                    formData.color === option.value
-                      ? option.color
-                      : "transparent",
-                  borderColor: option.color,
-                  color:
-                    formData.color === option.value ? "#fff" : option.color,
-                }}
-                onClick={() =>
-                  handleChange({
-                    target: { name: "color", value: option.value },
-                  })
-                }
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </div>
 
         <div className="mb-3">
           <select

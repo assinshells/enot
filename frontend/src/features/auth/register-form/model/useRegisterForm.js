@@ -14,7 +14,7 @@ export const useRegisterForm = () => {
     nickname: "",
     email: "",
     password: "",
-    color: "black", // По умолчанию черный
+    // ИСПРАВЛЕНО: убрали color из formData, т.к. бэкенд не принимает его при регистрации
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -39,6 +39,7 @@ export const useRegisterForm = () => {
     setLoading(true);
 
     try {
+      // ИСПРАВЛЕНО: отправляем только nickname, email, password
       await registerUser(formData);
       roomUtils.saveRoom(selectedRoom);
       navigate("/");

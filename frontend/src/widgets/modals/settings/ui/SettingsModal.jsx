@@ -1,14 +1,8 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/shared/lib/hooks/useAuth";
 import { userApi } from "@/entities/user";
+import { ColorPicker } from "@/shared/ui";
 import "./SettingsModal.css";
-
-const COLOR_OPTIONS = [
-  { value: "black", label: "Черный", color: "#000000" },
-  { value: "blue", label: "Синий", color: "#0d6efd" },
-  { value: "green", label: "Зеленый", color: "#198754" },
-  { value: "orange", label: "Оранжевый", color: "#fd7e14" },
-];
 
 export const SettingsModal = ({ isOpen, onClose }) => {
   const { user, setUser } = useAuth();
@@ -106,36 +100,12 @@ export const SettingsModal = ({ isOpen, onClose }) => {
               </div>
 
               <div className="mb-3">
-                <h6 className="text-muted mb-2">Цвет никнейма</h6>
-                <div className="d-flex gap-2">
-                  {COLOR_OPTIONS.map((option) => (
-                    <button
-                      key={option.value}
-                      type="button"
-                      className={`btn ${
-                        selectedColor === option.value
-                          ? "btn-primary"
-                          : "btn-outline-secondary"
-                      }`}
-                      style={{
-                        flex: 1,
-                        backgroundColor:
-                          selectedColor === option.value
-                            ? option.color
-                            : "transparent",
-                        borderColor: option.color,
-                        color:
-                          selectedColor === option.value
-                            ? "#fff"
-                            : option.color,
-                      }}
-                      onClick={() => handleColorChange(option.value)}
-                      disabled={saving}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
+                <h6 className="text-muted mb-2">Цвет никнейма и сообщений</h6>
+                <ColorPicker
+                  value={selectedColor}
+                  onChange={handleColorChange}
+                  disabled={saving}
+                />
               </div>
             </div>
           </div>

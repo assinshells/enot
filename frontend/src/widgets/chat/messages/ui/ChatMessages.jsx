@@ -1,17 +1,11 @@
 import { useEffect, useRef, memo, useMemo } from "react";
 import { formatTime } from "@/shared/lib/utils/formatTime";
 import { useAuth } from "@/shared/lib/hooks/useAuth";
+import { getColorValue } from "@/shared/config/colors";
 import "./ChatMessages.css";
 
-const COLOR_MAP = {
-  black: "#000000",
-  blue: "#0d6efd",
-  green: "#198754",
-  orange: "#fd7e14",
-};
-
 const MessageItem = memo(({ message, isOwn }) => {
-  const nicknameColor = COLOR_MAP[message.userColor] || COLOR_MAP.black;
+  const messageColor = getColorValue(message.userColor);
 
   return (
     <li className={isOwn ? "right" : "left"}>
@@ -19,13 +13,11 @@ const MessageItem = memo(({ message, isOwn }) => {
         <div className="ctext-wrap">
           <div className="ctext-wrap-content">
             <span className="chat-time">{formatTime(message.createdAt)}</span>
-            <span
-              className="conversation-name"
-              style={{ color: nicknameColor, fontWeight: "600" }}
-            >
-              {message.nickname}
+            <span className="conversation-name">{message.nickname}</span>
+            {/* ИСПРАВЛЕНО: цвет применяется ко всему тексту сообщения */}
+            <span className="conversation-text" style={{ color: messageColor }}>
+              {message.text}
             </span>
-            <span className="conversation-text">{message.text}</span>
           </div>
         </div>
       </div>

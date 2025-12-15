@@ -1,13 +1,7 @@
 import { useState, useEffect, useMemo, memo, useCallback } from "react";
 import { socketLib } from "@/shared/lib/socket/socket";
+import { getColorValue } from "@/shared/config/colors";
 import "./RoomSidebar.css";
-
-const COLOR_MAP = {
-  black: "#000000",
-  blue: "#0d6efd",
-  green: "#198754",
-  orange: "#fd7e14",
-};
 
 const RoomItem = memo(({ room, count, isActive, onClick }) => (
   <li
@@ -33,21 +27,23 @@ const RoomItem = memo(({ room, count, isActive, onClick }) => (
 
 RoomItem.displayName = "RoomItem";
 
-const UserItem = memo(({ user }) => (
-  <li className="list-group-item d-flex align-items-center">
-    <div
-      className="rounded-circle me-2"
-      style={{
-        width: "8px",
-        height: "8px",
-        backgroundColor: COLOR_MAP[user.color] || COLOR_MAP.black,
-      }}
-    ></div>
-    <span style={{ color: COLOR_MAP[user.color] || COLOR_MAP.black }}>
-      {user.nickname}
-    </span>
-  </li>
-));
+const UserItem = memo(({ user }) => {
+  const userColor = getColorValue(user.color);
+
+  return (
+    <li className="list-group-item d-flex align-items-center">
+      <div
+        className="rounded-circle me-2"
+        style={{
+          width: "8px",
+          height: "8px",
+          backgroundColor: userColor,
+        }}
+      ></div>
+      <span style={{ color: userColor }}>{user.nickname}</span>
+    </li>
+  );
+});
 
 UserItem.displayName = "UserItem";
 
@@ -102,7 +98,6 @@ export const RoomSidebar = ({ currentRoom, onRoomChange }) => {
 
   return (
     <aside className="room-sidebar border-start d-flex flex-column">
-      {/* Комнаты (30%) */}
       <div className="rooms-section border-bottom" style={{ flex: "0 0 30%" }}>
         <div className="p-3 border-bottom bg-light">
           <h6 className="mb-0">
@@ -124,7 +119,6 @@ export const RoomSidebar = ({ currentRoom, onRoomChange }) => {
         </div>
       </div>
 
-      {/* Пользователи (70%) */}
       <div
         className="users-section d-flex flex-column"
         style={{ flex: "1 1 70%" }}

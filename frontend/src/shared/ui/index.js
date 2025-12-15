@@ -7,3 +7,4 @@ export { Input } from "./Input/Input";
 export { Card } from "./Card/Card";
 export { Alert } from "./Alert/Alert";
 export { Spinner } from "./Spinner/Spinner";
+export { ColorPicker } from "./ColorPicker/ColorPicker";
