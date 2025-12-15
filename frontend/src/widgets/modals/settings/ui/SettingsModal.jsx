@@ -123,18 +123,6 @@ export const SettingsModal = ({ isOpen, onClose }) => {
                 </div>
               </div>
             </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={onClose}
-              >
-                Закрыть
-              </button>
-              <button type="button" className="btn btn-primary">
-                Сохранить изменения
-              </button>
-            </div>
           </div>
         </div>
       </div>
