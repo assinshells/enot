@@ -15,7 +15,7 @@ export const useChat = () => {
   const [counts, setCounts] = useState({});
 
   const abortControllerRef = useRef(null);
-  const isChangingRoomRef = useRef(false);
+  const roomChangeTimeoutRef = useRef(null);
 
   const loadMessages = useCallback(async (room) => {
     if (abortControllerRef.current) {
@@ -58,26 +58,25 @@ export const useChat = () => {
         return;
       }
 
-      if (isChangingRoomRef.current) {
-        console.warn("Room change already in progress");
-        return;
-      }
-
       const socket = socketLib.getSocket();
       if (!socket?.connected) {
         console.error("Socket not connected");
         return;
       }
 
-      isChangingRoomRef.current = true;
+      if (roomChangeTimeoutRef.current) {
+        clearTimeout(roomChangeTimeoutRef.current);
+      }
+
       setLoading(true);
       setMessages([]);
 
       socket.emit("room:leave");
 
-      setTimeout(() => {
+      roomChangeTimeoutRef.current = setTimeout(() => {
         setCurrentRoom(newRoom);
         socket.emit("room:join", { room: newRoom });
+        roomChangeTimeoutRef.current = null;
       }, 50);
     },
     [currentRoom]
@@ -117,10 +116,7 @@ export const useChat = () => {
     const handleConnect = () => {
       console.log("✅ Socket connected");
       setIsConnected(true);
-
-      if (!isChangingRoomRef.current) {
-        socket.emit("room:join", { room: currentRoom });
-      }
+      socket.emit("room:join", { room: currentRoom });
     };
 
     const handleDisconnect = () => {
@@ -128,10 +124,9 @@ export const useChat = () => {
       setIsConnected(false);
     };
 
-    const handleRoomJoined = ({ room, counts }) => {
+    const handleRoomJoined = ({ room, counts: newCounts }) => {
       console.log(`✅ Joined room: ${room}`);
-      setCounts(counts);
-      isChangingRoomRef.current = false;
+      setCounts(newCounts);
       loadMessages(room);
     };
 
@@ -155,10 +150,9 @@ export const useChat = () => {
       });
     };
 
-    const handleError = (error) => {
-      console.error("Socket.IO ошибка:", error);
-      setError(error.message);
-      isChangingRoomRef.current = false;
+    const handleError = (err) => {
+      console.error("Socket.IO ошибка:", err);
+      setError(err.message);
       setLoading(false);
     };
 
@@ -185,6 +179,10 @@ export const useChat = () => {
 
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
+      }
+
+      if (roomChangeTimeoutRef.current) {
+        clearTimeout(roomChangeTimeoutRef.current);
       }
     };
   }, [currentRoom, loadMessages]);

@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/shared/lib/hooks/useAuth";
 import { useRoomForm } from "@/shared/lib/hooks/useRoomForm";
+import { useFormError } from "@/shared/lib/hooks/useFormError";
 import { roomUtils } from "@/shared/lib/utils/roomUtils";
-import { authApi } from "@/entities/user";
 import { Input, Button, Alert, Card } from "@/shared/ui";
 
 export const LoginForm = () => {
@@ -11,55 +11,62 @@ export const LoginForm = () => {
   const { loginUser } = useAuth();
   const { selectedRoom, setSelectedRoom, availableRooms, validateRoom } =
     useRoomForm();
+  const { error, setError, clearError } = useFormError();
 
   const [formData, setFormData] = useState({
     nickname: "",
     password: "",
   });
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-  };
+  const handleChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  }, []);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
+  const handleSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
+      clearError();
 
-    const roomError = validateRoom();
-    if (roomError) {
-      setError(roomError);
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      // Пытаемся войти
-      const response = await loginUser(formData);
-      roomUtils.saveRoom(selectedRoom);
-      navigate("/");
-    } catch (err) {
-      // Если ошибка "user_not_found" - переходим на страницу email confirmation
-      if (err.message === "user_not_found") {
-        navigate("/email-confirmation", {
-          state: {
-            nickname: formData.nickname,
-            password: formData.password,
-            room: selectedRoom,
-          },
-        });
-      } else {
-        setError(err.message);
+      const roomError = validateRoom();
+      if (roomError) {
+        setError(roomError);
+        return;
       }
-    } finally {
-      setLoading(false);
-    }
-  };
+
+      setLoading(true);
+
+      try {
+        await loginUser(formData);
+        roomUtils.saveRoom(selectedRoom);
+        navigate("/");
+      } catch (err) {
+        if (err.message === "user_not_found") {
+          navigate("/email-confirmation", {
+            state: {
+              nickname: formData.nickname,
+              password: formData.password,
+              room: selectedRoom,
+            },
+          });
+        } else {
+          setError(err);
+        }
+      } finally {
+        setLoading(false);
+      }
+    },
+    [
+      formData,
+      selectedRoom,
+      validateRoom,
+      loginUser,
+      navigate,
+      setError,
+      clearError,
+    ]
+  );
 
   return (
     <Card>
@@ -85,8 +92,6 @@ export const LoginForm = () => {
         <div className="mb-3">
           <select
             className="form-select border-light bg-soft-light"
-            id="room"
-            name="room"
             value={selectedRoom}
             onChange={(e) => setSelectedRoom(e.target.value)}
             required

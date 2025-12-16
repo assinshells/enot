@@ -15,6 +15,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true,
       lowercase: true,
+      sparse: true,
       match: [/^\S+@\S+\.\S+$/, "Введите корректный email"],
     },
     password: {
@@ -40,7 +41,7 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-userSchema.index({ email: 1 });
+userSchema.index({ email: 1 }, { sparse: true });
 
 userSchema.pre("save", async function () {
   if (!this.isModified("password")) {

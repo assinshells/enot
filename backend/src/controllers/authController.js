@@ -34,15 +34,11 @@ export const register = async (req, res, next) => {
     const { nickname, email, password, captchaToken } = req.body;
 
     // В production проверяем капчу
-    if (process.env.NODE_ENV === "production") {
-      // TODO: Добавить проверку капчи с внешним сервисом
-      // Например, с Google reCAPTCHA или hCaptcha
-      if (!captchaToken) {
-        return res.status(400).json({
-          success: false,
-          message: "Требуется пройти проверку капчи",
-        });
-      }
+    if (process.env.NODE_ENV === "production" && !captchaToken) {
+      return res.status(400).json({
+        success: false,
+        message: "Требуется пройти проверку капчи",
+      });
     }
 
     // Проверка существования пользователя
@@ -55,13 +51,19 @@ export const register = async (req, res, next) => {
       });
     }
 
-    // Создание пользователя
-    const user = await User.create({
+    // Создание пользователя (email может быть пустым)
+    const userData = {
       nickname,
-      email: email || undefined,
       password,
       isNewUser: true,
-    });
+    };
+
+    // Добавляем email только если он передан
+    if (email && email.trim()) {
+      userData.email = email.trim();
+    }
+
+    const user = await User.create(userData);
 
     logger.info(`Новый пользователь зарегистрирован: ${nickname}`);
 

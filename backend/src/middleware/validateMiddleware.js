@@ -8,6 +8,7 @@ const validate = (schema) => {
       const errors = error.details.map((detail) => detail.message);
       return res.status(400).json({
         success: false,
+        message: errors.join(", "),
         errors,
       });
     }
@@ -22,18 +23,19 @@ export const registerSchema = Joi.object({
     "string.max": "Никнейм не должен превышать 30 символов",
     "any.required": "Никнейм обязателен",
   }),
-  email: Joi.string().email().optional().allow("").messages({
+  email: Joi.string().email().optional().allow("", null).messages({
     "string.email": "Введите корректный email",
   }),
   password: Joi.string().min(6).required().messages({
     "string.min": "Пароль должен быть минимум 6 символов",
     "any.required": "Пароль обязателен",
   }),
+  captchaToken: Joi.string().optional().allow("", null),
 });
 
 export const loginSchema = Joi.object({
-  login: Joi.string().required().messages({
-    "any.required": "Никнейм или email обязателен",
+  nickname: Joi.string().required().messages({
+    "any.required": "Никнейм обязателен",
   }),
   password: Joi.string().required().messages({
     "any.required": "Пароль обязателен",

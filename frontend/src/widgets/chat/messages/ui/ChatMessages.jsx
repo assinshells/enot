@@ -1,4 +1,4 @@
-import { useEffect, useRef, memo, useMemo } from "react";
+import { useEffect, useRef, memo } from "react";
 import { formatTime } from "@/shared/lib/utils/formatTime";
 import { useAuth } from "@/shared/lib/hooks/useAuth";
 import { getColorValue } from "@/shared/config/colors";
@@ -14,7 +14,6 @@ const MessageItem = memo(({ message, isOwn }) => {
           <div className="ctext-wrap-content">
             <span className="chat-time">{formatTime(message.createdAt)}</span>
             <span className="conversation-name">{message.nickname}</span>
-            {/* ИСПРАВЛЕНО: цвет применяется ко всему тексту сообщения */}
             <span className="conversation-text" style={{ color: messageColor }}>
               {message.text}
             </span>
@@ -27,56 +26,54 @@ const MessageItem = memo(({ message, isOwn }) => {
 
 MessageItem.displayName = "MessageItem";
 
-const LoadingSpinner = () => (
+const LoadingSpinner = memo(() => (
   <div className="d-flex justify-content-center align-items-center h-100">
     <div className="spinner-border text-primary" role="status">
       <span className="visually-hidden">Загрузка...</span>
     </div>
   </div>
-);
+));
 
-const EmptyState = () => (
+LoadingSpinner.displayName = "LoadingSpinner";
+
+const EmptyState = memo(() => (
   <div className="d-flex justify-content-center align-items-center h-100">
     <p className="text-muted">Нет сообщений. Начните общение!</p>
   </div>
-);
+));
 
-export const ChatMessages = ({ messages, loading }) => {
+EmptyState.displayName = "EmptyState";
+
+export const ChatMessages = memo(({ messages, loading }) => {
   const { user } = useAuth();
   const messagesEndRef = useRef(null);
 
-  const messageList = useMemo(() => {
-    if (!messages || messages.length === 0) return [];
-    return messages.map((message) => ({
-      ...message,
-      isOwn: message.user === user?._id,
-    }));
-  }, [messages, user?._id]);
-
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messageList]);
+  }, [messages]);
 
   if (loading) {
     return <LoadingSpinner />;
   }
 
-  if (messageList.length === 0) {
+  if (!messages || messages.length === 0) {
     return <EmptyState />;
   }
 
   return (
     <div className="chat-messages p-3">
       <ul className="chat-conversation list-unstyled mb-0">
-        {messageList.map((message) => (
+        {messages.map((message) => (
           <MessageItem
             key={message._id}
             message={message}
-            isOwn={message.isOwn}
+            isOwn={message.user === user?._id}
           />
         ))}
       </ul>
       <div ref={messagesEndRef} />
     </div>
   );
-};
+});
+
+ChatMessages.displayName = "ChatMessages";

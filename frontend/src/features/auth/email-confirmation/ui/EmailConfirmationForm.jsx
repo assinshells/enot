@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/shared/lib/hooks/useAuth";
-import { authApi } from "@/entities/user";
+import { useFormError } from "@/shared/lib/hooks/useFormError";
 import { Input, Button, Alert, Card } from "@/shared/ui";
 import { roomUtils } from "@/shared/lib/utils/roomUtils";
 
@@ -9,53 +9,63 @@ export const EmailConfirmationForm = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { registerUser } = useAuth();
+  const { error, setError, clearError } = useFormError();
 
   const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Получаем данные из state (nickname, password, room)
   const { nickname, password, room } = location.state || {};
 
   useEffect(() => {
-    // Если нет данных для регистрации - редирект на логин
     if (!nickname || !password || !room) {
       navigate("/login");
     }
   }, [nickname, password, room, navigate]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+  const handleSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
+      clearError();
+      setLoading(true);
 
-    try {
-      // Регистрация с email (капча в dev режиме не проверяется)
-      const captchaToken =
-        process.env.NODE_ENV === "production" ? "" : "dev_mode";
+      try {
+        const captchaToken =
+          process.env.NODE_ENV === "production" ? "" : "dev_mode";
 
-      await registerUser({
-        nickname,
-        password,
-        email: email || undefined,
-        captchaToken,
-      });
+        const registrationData = {
+          nickname,
+          password,
+          captchaToken,
+        };
 
-      // Сохраняем комнату
-      roomUtils.saveRoom(room);
+        // Добавляем email только если он заполнен
+        if (email && email.trim()) {
+          registrationData.email = email.trim();
+        }
 
-      // Переходим в чат
-      navigate("/");
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+        await registerUser(registrationData);
 
-  if (!nickname) {
-    return null;
-  }
+        roomUtils.saveRoom(room);
+        navigate("/");
+      } catch (err) {
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [
+      nickname,
+      password,
+      email,
+      room,
+      registerUser,
+      navigate,
+      setError,
+      clearError,
+    ]
+  );
+
+  if (!nickname) return null;
 
   return (
     <Card>
