@@ -2,6 +2,16 @@
   --bs-sidebar-bg: #fff;
   --bs-border-color: #f0eff5;
   --bs-sidebar-menu-item-color: #878a92;
+
+  --bs-light: #e6ebf5;
+
+  --bs-primary: #7269ef;
+  --bs-primary-rgb: 114, 105, 239;
+}
+
+.border-light {
+  border-color: #e6ebf5 !important;
+  border-color: var(--bs-light) !important;
 }
 
 /* Правые сообщения (мои) */

@@ -73,49 +73,64 @@ export const LoginForm = () => {
       <Card>
         {error && <Alert type="danger">{error}</Alert>}
 
-        <form onSubmit={handleSubmit} className="d-flex flex-column w-100">
-          <Input
-            name="nickname"
-            placeholder="Никнейм"
-            value={formData.nickname}
-            onChange={handleChange}
-            required
-          />
-          <Input
-            type="password"
-            name="password"
-            placeholder="Пароль"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-
+        <form onSubmit={handleSubmit}>
           <div className="mb-3">
-            <select
-              className="form-select"
-              value={selectedRoom}
-              onChange={(e) => setSelectedRoom(e.target.value)}
-              required
-            >
-              <option value="" disabled>
-                Выберите комнату...
-              </option>
-              {availableRooms.map((room) => (
-                <option key={room} value={room}>
-                  {room}
-                </option>
-              ))}
-            </select>
+            <div className="mb-3 bg-soft-light rounded-3">
+              <Input
+                name="nickname"
+                placeholder="Никнейм"
+                value={formData.nickname}
+                onChange={handleChange}
+                required
+              />
+            </div>
           </div>
-
-          <Button type="submit" loading={loading} fullWidth>
-            Войти
-          </Button>
+          <div className="mb-3">
+            <div className="mb-3 bg-soft-light rounded-3">
+              <Input
+                type="password"
+                name="password"
+                placeholder="Пароль"
+                value={formData.password}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
+          <div className="mb-3">
+            <div className="mb-3 bg-soft-light rounded-3">
+              <select
+                className="form-select border-light
+                bg-soft-light"
+                value={selectedRoom}
+                onChange={(e) => setSelectedRoom(e.target.value)}
+                required
+              >
+                <option value="" disabled>
+                  Выберите комнату...
+                </option>
+                {availableRooms.map((room) => (
+                  <option key={room} value={room}>
+                    {room}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="d-grid">
+            <Button type="submit" loading={loading} fullWidth>
+              Войти
+            </Button>
+          </div>
         </form>
-        <small className="text-muted mt-2 d-block text-center">
-          Новый пользователь? Просто введите никнейм и пароль
-        </small>
       </Card>
+      <div className="mt-5 text-center">
+        <p>Новый пользователь? Просто введите никнейм и пароль</p>
+        <p>
+          © 2025 Chatvia. Crafted with{" "}
+          <i className="bi bi-heart-fill text-danger"></i> by Themesbrand
+        </p>
+      </div>
     </>
   );
 };

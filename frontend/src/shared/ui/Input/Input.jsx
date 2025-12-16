@@ -12,12 +12,12 @@ export const Input = ({
   helperText,
   required = false,
   disabled = false,
-  className = "border-light bg-soft-light",
+  className = "form-control border-light bg-soft-light",
   ...props
 }) => {
   const inputClass = `form-control ${error ? "is-invalid" : ""} ${className}`;
   return (
-    <div className="mb-3">
+    <>
       <input
         type={type}
         name={name}
@@ -33,6 +33,6 @@ export const Input = ({
         <small className="text-muted d-block mt-1">{helperText}</small>
       )}
       {error && <div className="invalid-feedback d-block">{error}</div>}
-    </div>
+    </>
   );
 };

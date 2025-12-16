@@ -10,7 +10,7 @@ export const Button = ({
   fullWidth = false,
   loading = false,
   disabled = false,
-  className = "bg-primary text-light py-1 border rounded-1",
+  className = "d-block",
   onClick,
   ...props
 }) => {

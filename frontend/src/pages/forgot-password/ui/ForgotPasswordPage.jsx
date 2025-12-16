@@ -6,22 +6,19 @@ import { ForgotPasswordForm } from "@/features/auth";
 
 export const ForgotPasswordPage = () => {
   return (
-    <div className="account-pages my-5 pt-sm-5">
-      <div className="container">
-        <div className="justify-content-center row">
-          <div className="col-md-8 col-lg-6 col-xl-5">
-            <div className="text-center mb-4">
-              <a class="auth-logo mb-5 d-block" href="/">
-                <img src="" alt="" height="30" class="logo logo-dark" />
-                <img src="" alt="" height="30" class="logo logo-light" />
-              </a>
-              <h4>Reset Password</h4>
-              <p class="text-muted mb-4">Reset Password With Chatvia.</p>
+    <>
+      <div className="container d-flex vh-100  justify-content-center align-items-center">
+        <div className="row w-100 justify-content-around gap-5">
+          <div className="left col-lg-5 col-md-12 text-center text-lg-start pt-5">
+            <h1 className="text-primary mb-3">Chat App</h1>
+            <div className="fs-4">Создайте аккаунт для входа в чат</div>
+            <div className="d-none d-md-block">
+              галерея(здесь будут фото пользователей)
             </div>
-            <ForgotPasswordForm />
           </div>
+          <ForgotPasswordForm />
         </div>
       </div>
-    </div>
+    </>
   );
 };
