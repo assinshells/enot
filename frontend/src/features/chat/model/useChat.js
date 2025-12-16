@@ -15,12 +15,7 @@ export const useChat = () => {
   const [counts, setCounts] = useState({});
 
   const abortControllerRef = useRef(null);
-  const isInitializedRef = useRef(false);
   const isChangingRoomRef = useRef(false);
-
-  useEffect(() => {
-    roomUtils.clearRoom();
-  }, []);
 
   const loadMessages = useCallback(async (room) => {
     if (abortControllerRef.current) {
@@ -69,7 +64,7 @@ export const useChat = () => {
       }
 
       const socket = socketLib.getSocket();
-      if (!socket || !socket.connected) {
+      if (!socket?.connected) {
         console.error("Socket not connected");
         return;
       }
@@ -78,10 +73,8 @@ export const useChat = () => {
       setLoading(true);
       setMessages([]);
 
-      // Сначала выходим из текущей комнаты
       socket.emit("room:leave");
 
-      // Затем меняем состояние и входим в новую
       setTimeout(() => {
         setCurrentRoom(newRoom);
         socket.emit("room:join", { room: newRoom });
@@ -133,21 +126,13 @@ export const useChat = () => {
     const handleDisconnect = () => {
       console.log("❌ Socket disconnected");
       setIsConnected(false);
-      isInitializedRef.current = false;
     };
 
     const handleRoomJoined = ({ room, counts }) => {
       console.log(`✅ Joined room: ${room}`);
       setCounts(counts);
       isChangingRoomRef.current = false;
-
-      // Загружаем сообщения для комнаты, в которую вошли
       loadMessages(room);
-      isInitializedRef.current = true;
-    };
-
-    const handleRoomLeft = () => {
-      console.log(`❌ Left current room`);
     };
 
     const handleRoomList = (data) => {
@@ -180,7 +165,6 @@ export const useChat = () => {
     socket.on("connect", handleConnect);
     socket.on("disconnect", handleDisconnect);
     socket.on("room:joined", handleRoomJoined);
-    socket.on("room:left", handleRoomLeft);
     socket.on("room:list", handleRoomList);
     socket.on("room:counts", handleRoomCounts);
     socket.on("message:new", handleNewMessage);
@@ -194,7 +178,6 @@ export const useChat = () => {
       socket.off("connect", handleConnect);
       socket.off("disconnect", handleDisconnect);
       socket.off("room:joined", handleRoomJoined);
-      socket.off("room:left", handleRoomLeft);
       socket.off("room:list", handleRoomList);
       socket.off("room:counts", handleRoomCounts);
       socket.off("message:new", handleNewMessage);

@@ -1,9 +1,4 @@
-/**
- * Widget: Settings Modal Styles
- * Путь: src/widgets/modals/settings/ui/SettingsModal.css
- */
-
-/* Backdrop */
+/* Modal Backdrop */
 .modal-backdrop-custom {
   position: fixed;
   top: 0;
@@ -15,7 +10,7 @@
   animation: fadeIn 0.15s ease-in;
 }
 
-/* Modal */
+/* Modal Container */
 .modal-custom {
   position: fixed;
   top: 0;
@@ -44,7 +39,7 @@
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
 }
 
-/* Анимации */
+/* Animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -65,7 +60,7 @@
   }
 }
 
-/* Адаптивность */
+/* Responsive */
 @media (max-width: 576px) {
   .modal-custom {
     padding: 0.5rem;

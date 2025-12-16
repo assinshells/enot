@@ -26,7 +26,6 @@ export const ChatPage = () => {
   const [isColorSelectionOpen, setIsColorSelectionOpen] = useState(false);
   const [localError, setLocalError] = useState(null);
 
-  // Показываем ColorSelectionModal для новых пользователей
   useEffect(() => {
     if (user?.isNewUser) {
       setIsColorSelectionOpen(true);
