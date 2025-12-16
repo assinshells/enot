@@ -29,9 +29,10 @@ const userSchema = new mongoose.Schema(
       enum: ["black", "blue", "green", "orange"],
       default: "black",
     },
-    isNewUser: {
-      type: Boolean,
-      default: true,
+    gender: {
+      type: String,
+      enum: ["male", "female", "unknown"],
+      default: "male",
     },
     resetPasswordToken: String,
     resetPasswordExpire: Date,

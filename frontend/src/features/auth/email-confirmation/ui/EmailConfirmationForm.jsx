@@ -2,7 +2,14 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/shared/lib/hooks/useAuth";
 import { useFormError } from "@/shared/lib/hooks/useFormError";
-import { Input, Button, Alert, Card } from "@/shared/ui";
+import {
+  Input,
+  Button,
+  Alert,
+  Card,
+  ColorPicker,
+  GenderPicker,
+} from "@/shared/ui";
 import { roomUtils } from "@/shared/lib/utils/roomUtils";
 
 export const EmailConfirmationForm = () => {
@@ -12,6 +19,8 @@ export const EmailConfirmationForm = () => {
   const { error, setError, clearError } = useFormError();
 
   const [email, setEmail] = useState("");
+  const [selectedColor, setSelectedColor] = useState("black");
+  const [selectedGender, setSelectedGender] = useState("male");
   const [loading, setLoading] = useState(false);
 
   const { nickname, password, room } = location.state || {};
@@ -35,10 +44,11 @@ export const EmailConfirmationForm = () => {
         const registrationData = {
           nickname,
           password,
+          color: selectedColor,
+          gender: selectedGender,
           captchaToken,
         };
 
-        // Добавляем email только если он заполнен
         if (email && email.trim()) {
           registrationData.email = email.trim();
         }
@@ -57,6 +67,8 @@ export const EmailConfirmationForm = () => {
       nickname,
       password,
       email,
+      selectedColor,
+      selectedGender,
       room,
       registerUser,
       navigate,
@@ -89,6 +101,24 @@ export const EmailConfirmationForm = () => {
           onChange={(e) => setEmail(e.target.value)}
           helperText="Нужен для восстановления пароля"
         />
+
+        <div className="mb-3">
+          <label className="form-label">Цвет никнейма и сообщений</label>
+          <ColorPicker
+            value={selectedColor}
+            onChange={setSelectedColor}
+            disabled={loading}
+          />
+        </div>
+
+        <div className="mb-3">
+          <label className="form-label">Пол</label>
+          <GenderPicker
+            value={selectedGender}
+            onChange={setSelectedGender}
+            disabled={loading}
+          />
+        </div>
 
         {process.env.NODE_ENV === "production" && (
           <div className="mb-3">

@@ -1,11 +1,6 @@
 import User from "../models/userModel.js";
 import logger from "../config/logger.js";
 
-/**
- * @desc    Получить профиль текущего пользователя
- * @route   GET /api/users/profile
- * @access  Private
- */
 export const getProfile = async (req, res, next) => {
   try {
     const user = {
@@ -13,6 +8,7 @@ export const getProfile = async (req, res, next) => {
       nickname: req.user.nickname,
       email: req.user.email,
       color: req.user.color,
+      gender: req.user.gender,
       createdAt: req.user.createdAt,
     };
 
@@ -27,14 +23,9 @@ export const getProfile = async (req, res, next) => {
   }
 };
 
-/**
- * @desc    Обновить профиль пользователя
- * @route   PUT /api/users/profile
- * @access  Private
- */
 export const updateProfile = async (req, res, next) => {
   try {
-    const { color } = req.body;
+    const { color, gender } = req.body;
 
     if (color && !["black", "blue", "green", "orange"].includes(color)) {
       return res.status(400).json({
@@ -43,10 +34,21 @@ export const updateProfile = async (req, res, next) => {
       });
     }
 
+    if (gender && !["male", "female", "unknown"].includes(gender)) {
+      return res.status(400).json({
+        success: false,
+        message: "Недопустимый пол",
+      });
+    }
+
     const user = await User.findById(req.user._id);
 
     if (color) {
       user.color = color;
+    }
+
+    if (gender) {
+      user.gender = gender;
     }
 
     await user.save();
@@ -60,6 +62,7 @@ export const updateProfile = async (req, res, next) => {
         nickname: user.nickname,
         email: user.email,
         color: user.color,
+        gender: user.gender,
         createdAt: user.createdAt,
       },
     });

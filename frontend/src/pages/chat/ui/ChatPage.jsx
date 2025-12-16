@@ -1,17 +1,14 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { LeftSidebarMenu } from "@/widgets/left-sidebar-menu/ui/LeftSidebarMenu";
 import { RoomSidebar } from "@/widgets/room-sidebar/ui/RoomSidebar";
 import { ChatMessages } from "@/widgets/chat/messages/ui/ChatMessages";
 import { ChatInput } from "@/widgets/chat/input/ui/ChatInput";
 import { SettingsModal } from "@/widgets/modals/settings/ui/SettingsModal";
-import { ColorSelectionModal } from "@/widgets/modals/color-selection/ui/ColorSelectionModal";
 import { useChat } from "@/features/chat/model/useChat";
-import { useAuth } from "@/shared/lib/hooks/useAuth";
 import { Alert } from "@/shared/ui";
 import "./ChatPage.css";
 
 export const ChatPage = () => {
-  const { user } = useAuth();
   const {
     currentRoom,
     messages,
@@ -23,18 +20,7 @@ export const ChatPage = () => {
   } = useChat();
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isColorSelectionOpen, setIsColorSelectionOpen] = useState(false);
-  const [localError, setLocalError] = useState(null);
-
-  useEffect(() => {
-    if (user?.isNewUser) {
-      setIsColorSelectionOpen(true);
-    }
-  }, [user?.isNewUser]);
-
-  useEffect(() => {
-    setLocalError(error);
-  }, [error]);
+  const [localError, setLocalError] = useState(error);
 
   const handleSendMessage = useCallback(
     async (text) => {
@@ -57,10 +43,6 @@ export const ChatPage = () => {
 
   const handleCloseSettings = useCallback(() => {
     setIsSettingsOpen(false);
-  }, []);
-
-  const handleCloseColorSelection = useCallback(() => {
-    setIsColorSelectionOpen(false);
   }, []);
 
   return (
@@ -90,10 +72,6 @@ export const ChatPage = () => {
         </div>
 
         <SettingsModal isOpen={isSettingsOpen} onClose={handleCloseSettings} />
-        <ColorSelectionModal
-          isOpen={isColorSelectionOpen}
-          onClose={handleCloseColorSelection}
-        />
       </div>
     </>
   );

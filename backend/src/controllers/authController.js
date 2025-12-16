@@ -4,11 +4,6 @@ import { generateResetToken, hashResetToken } from "../utils/passwordHash.js";
 import mailService from "../services/mailService.js";
 import logger from "../config/logger.js";
 
-/**
- * @desc    Проверка существования пользователя
- * @route   POST /api/auth/check-user
- * @access  Public
- */
 export const checkUser = async (req, res, next) => {
   try {
     const { nickname } = req.body;
@@ -24,16 +19,10 @@ export const checkUser = async (req, res, next) => {
   }
 };
 
-/**
- * @desc    Регистрация нового пользователя (с email и капчей)
- * @route   POST /api/auth/register
- * @access  Public
- */
 export const register = async (req, res, next) => {
   try {
-    const { nickname, email, password, captchaToken } = req.body;
+    const { nickname, email, password, color, gender, captchaToken } = req.body;
 
-    // В production проверяем капчу
     if (process.env.NODE_ENV === "production" && !captchaToken) {
       return res.status(400).json({
         success: false,
@@ -41,7 +30,6 @@ export const register = async (req, res, next) => {
       });
     }
 
-    // Проверка существования пользователя
     const userExists = await User.findOne({ nickname });
 
     if (userExists) {
@@ -51,14 +39,13 @@ export const register = async (req, res, next) => {
       });
     }
 
-    // Создание пользователя (email может быть пустым)
     const userData = {
       nickname,
       password,
-      isNewUser: true,
+      color: color || "black",
+      gender: gender || "unknown",
     };
 
-    // Добавляем email только если он передан
     if (email && email.trim()) {
       userData.email = email.trim();
     }
@@ -74,7 +61,7 @@ export const register = async (req, res, next) => {
         nickname: user.nickname,
         email: user.email,
         color: user.color,
-        isNewUser: user.isNewUser,
+        gender: user.gender,
         token: generateToken(user._id),
       },
     });
@@ -83,16 +70,10 @@ export const register = async (req, res, next) => {
   }
 };
 
-/**
- * @desc    Авторизация пользователя
- * @route   POST /api/auth/login
- * @access  Public
- */
 export const login = async (req, res, next) => {
   try {
     const { nickname, password } = req.body;
 
-    // Поиск пользователя по никнейму
     const user = await User.findOne({ nickname }).select("+password");
 
     if (!user) {
@@ -103,7 +84,6 @@ export const login = async (req, res, next) => {
       });
     }
 
-    // Проверка пароля
     const isMatch = await user.matchPassword(password);
 
     if (!isMatch) {
@@ -123,7 +103,7 @@ export const login = async (req, res, next) => {
         nickname: user.nickname,
         email: user.email,
         color: user.color,
-        isNewUser: user.isNewUser,
+        gender: user.gender,
         token: generateToken(user._id),
       },
     });
@@ -132,33 +112,6 @@ export const login = async (req, res, next) => {
   }
 };
 
-/**
- * @desc    Установить флаг isNewUser в false
- * @route   POST /api/auth/mark-user-seen
- * @access  Private
- */
-export const markUserSeen = async (req, res, next) => {
-  try {
-    const user = await User.findById(req.user._id);
-
-    if (user.isNewUser) {
-      user.isNewUser = false;
-      await user.save();
-    }
-
-    res.json({
-      success: true,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * @desc    Запрос на восстановление пароля
- * @route   POST /api/auth/forgot-password
- * @access  Public
- */
 export const forgotPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
@@ -172,19 +125,15 @@ export const forgotPassword = async (req, res, next) => {
       });
     }
 
-    // Генерация токена сброса
     const resetToken = generateResetToken();
     const hashedToken = hashResetToken(resetToken);
 
-    // Сохранение токена и времени истечения (10 минут)
     user.resetPasswordToken = hashedToken;
     user.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
     await user.save();
 
-    // URL для сброса пароля
     const resetUrl = `${process.env.CORS_ORIGIN}/reset-password/${resetToken}`;
 
-    // Отправка email
     await mailService.sendPasswordReset(email, resetUrl);
 
     logger.info(`Запрос восстановления пароля для: ${email}`);
@@ -198,17 +147,11 @@ export const forgotPassword = async (req, res, next) => {
   }
 };
 
-/**
- * @desc    Сброс пароля по токену
- * @route   POST /api/auth/reset-password/:token
- * @access  Public
- */
 export const resetPassword = async (req, res, next) => {
   try {
     const { password } = req.body;
     const hashedToken = hashResetToken(req.params.token);
 
-    // Поиск пользователя с валидным токеном
     const user = await User.findOne({
       resetPasswordToken: hashedToken,
       resetPasswordExpire: { $gt: Date.now() },
@@ -221,7 +164,6 @@ export const resetPassword = async (req, res, next) => {
       });
     }
 
-    // Установка нового пароля
     user.password = password;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;

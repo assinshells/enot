@@ -4,10 +4,8 @@
  */
 export const Card = ({ children }) => {
   return (
-    <div className="card">
-      <div className="card-body p-4">
-        <div className="p-3">{children}</div>
-      </div>
+    <div className="right col-lg-5 col-md-12 d-flex flex-column">
+      <div className="card border-0">{children}</div>
     </div>
   );
 };

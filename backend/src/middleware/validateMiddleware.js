@@ -30,6 +30,15 @@ export const registerSchema = Joi.object({
     "string.min": "Пароль должен быть минимум 6 символов",
     "any.required": "Пароль обязателен",
   }),
+  color: Joi.string()
+    .valid("black", "blue", "green", "orange")
+    .optional()
+    .messages({
+      "any.only": "Недопустимый цвет",
+    }),
+  gender: Joi.string().valid("male", "female", "unknown").optional().messages({
+    "any.only": "Недопустимый пол",
+  }),
   captchaToken: Joi.string().optional().allow("", null),
 });
 

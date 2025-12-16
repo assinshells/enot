@@ -3,7 +3,6 @@ import {
   register,
   login,
   checkUser,
-  markUserSeen,
   forgotPassword,
   resetPassword,
 } from "../controllers/authController.js";
@@ -20,7 +19,6 @@ const router = express.Router();
 router.post("/check-user", checkUser);
 router.post("/register", validate(registerSchema), register);
 router.post("/login", validate(loginSchema), login);
-router.post("/mark-user-seen", protect, markUserSeen);
 router.post("/forgot-password", validate(forgotPasswordSchema), forgotPassword);
 router.post(
   "/reset-password/:token",

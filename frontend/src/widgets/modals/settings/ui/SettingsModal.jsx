@@ -1,11 +1,14 @@
 import { useState, useCallback } from "react";
 import { useAuth } from "@/shared/lib/hooks/useAuth";
 import { userApi } from "@/entities/user";
-import { ColorPicker, Modal } from "@/shared/ui";
+import { ColorPicker, GenderPicker, Modal } from "@/shared/ui";
 
 export const SettingsModal = ({ isOpen, onClose }) => {
   const { user, setUser } = useAuth();
   const [selectedColor, setSelectedColor] = useState(user?.color || "black");
+  const [selectedGender, setSelectedGender] = useState(
+    user?.gender || "unknown"
+  );
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -16,12 +19,32 @@ export const SettingsModal = ({ isOpen, onClose }) => {
       setMessage("");
 
       try {
-        await userApi.updateColor(color);
+        await userApi.updateProfile({ color });
         setUser((prev) => ({ ...prev, color }));
         setMessage("Цвет успешно изменен!");
         setTimeout(() => setMessage(""), 2000);
       } catch (error) {
         setMessage("Ошибка при изменении цвета");
+      } finally {
+        setSaving(false);
+      }
+    },
+    [setUser]
+  );
+
+  const handleGenderChange = useCallback(
+    async (gender) => {
+      setSelectedGender(gender);
+      setSaving(true);
+      setMessage("");
+
+      try {
+        await userApi.updateProfile({ gender });
+        setUser((prev) => ({ ...prev, gender }));
+        setMessage("Пол успешно изменен!");
+        setTimeout(() => setMessage(""), 2000);
+      } catch (error) {
+        setMessage("Ошибка при изменении пола");
       } finally {
         setSaving(false);
       }
@@ -71,6 +94,15 @@ export const SettingsModal = ({ isOpen, onClose }) => {
         <ColorPicker
           value={selectedColor}
           onChange={handleColorChange}
+          disabled={saving}
+        />
+      </div>
+
+      <div className="mb-3">
+        <h6 className="text-muted mb-2">Пол</h6>
+        <GenderPicker
+          value={selectedGender}
+          onChange={handleGenderChange}
           disabled={saving}
         />
       </div>
