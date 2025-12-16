@@ -7,6 +7,7 @@ import { AppRouter } from "./router/AppRouter";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import "./styles/app.css";
 import "./styles/variables.css";
 import "./styles/global.css";
 

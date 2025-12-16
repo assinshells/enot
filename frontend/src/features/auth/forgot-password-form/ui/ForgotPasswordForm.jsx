@@ -16,22 +16,31 @@ export const ForgotPasswordForm = () => {
       {message && <Alert type="success">{message}</Alert>}
 
       <form onSubmit={handleSubmit}>
-        <Input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          helperText="Введите email, указанный при регистрации"
-          required
-        />
-
-        <Button type="submit" loading={loading} fullWidth>
-          Отправить
-        </Button>
+        <div className="mb-3">
+          <div className="mb-3 bg-soft-light rounded-3">
+            <Input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              helperText="Введите email, указанный при регистрации"
+              required
+            />
+          </div>
+        </div>
+        <div className="d-grid">
+          <Button type="submit" loading={loading} fullWidth>
+            Отправить
+          </Button>
+        </div>
       </form>
 
-      <div className="text-center mt-3">
+      <div className="mt-5 text-center">
         <Link to="/login">Вернуться к входу</Link>
+        <p>
+          © 2025 Chatvia. Crafted with{" "}
+          <i className="bi bi-heart-fill text-danger"></i> by Themesbrand
+        </p>
       </div>
     </Card>
   );
