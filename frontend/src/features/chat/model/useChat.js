@@ -83,7 +83,7 @@ export const useChat = () => {
   );
 
   const sendMessage = useCallback(
-    async (text) => {
+    async (text, recipient = null) => {
       const trimmedText = text.trim();
 
       if (!trimmedText) {
@@ -97,7 +97,7 @@ export const useChat = () => {
       try {
         setSending(true);
         setError(null);
-        await chatApi.sendMessage(trimmedText, currentRoom);
+        await chatApi.sendMessage(trimmedText, currentRoom, recipient);
       } catch (err) {
         console.error("Ошибка отправки сообщения:", err);
         setError(err.message);

@@ -1,7 +1,3 @@
-/**
- * Entity: Chat API
- * Путь: src/entities/chat/api/chatApi.js
- */
 import { request } from "@/shared/api/request";
 
 export const chatApi = {
@@ -21,8 +17,15 @@ export const chatApi = {
    * Отправить сообщение в комнату
    * @param {string} text - Текст сообщения
    * @param {string} room - Название комнаты
+   * @param {string|null} recipient - Получатель (опционально)
    */
-  sendMessage: async (text, room) => {
-    return request.post("/chat/messages", { text, room });
+  sendMessage: async (text, room, recipient = null) => {
+    const data = { text, room };
+
+    if (recipient && recipient.trim()) {
+      data.recipient = recipient.trim();
+    }
+
+    return request.post("/chat/messages", data);
   },
 };

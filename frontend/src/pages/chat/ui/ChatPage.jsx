@@ -21,17 +21,27 @@ export const ChatPage = () => {
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [localError, setLocalError] = useState(error);
+  const [recipientValue, setRecipientValue] = useState("");
+  const [messageValue, setMessageValue] = useState("");
 
   const handleSendMessage = useCallback(
-    async (text) => {
+    async ({ text, recipient }) => {
       try {
-        await sendMessage(text);
+        await sendMessage(text, recipient);
       } catch (err) {
         console.error("Ошибка отправки:", err);
       }
     },
     [sendMessage]
   );
+
+  const handleTimeClick = useCallback((time) => {
+    setMessageValue(time);
+  }, []);
+
+  const handleNicknameClick = useCallback((nickname) => {
+    setRecipientValue(nickname);
+  }, []);
 
   const handleCloseError = useCallback(() => {
     setLocalError(null);
@@ -62,12 +72,26 @@ export const ChatPage = () => {
           <div className="d-flex flex-grow-1 overflow-hidden">
             <div className="flex-grow-1 d-flex flex-column overflow-hidden">
               <div className="flex-grow-1 overflow-auto">
-                <ChatMessages messages={messages} loading={loading} />
+                <ChatMessages
+                  messages={messages}
+                  loading={loading}
+                  onTimeClick={handleTimeClick}
+                  onNicknameClick={handleNicknameClick}
+                />
               </div>
-              <ChatInput onSendMessage={handleSendMessage} loading={sending} />
+              <ChatInput
+                onSendMessage={handleSendMessage}
+                loading={sending}
+                recipientValue={recipientValue}
+                messageValue={messageValue}
+              />
             </div>
 
-            <RoomSidebar currentRoom={currentRoom} onRoomChange={changeRoom} />
+            <RoomSidebar
+              currentRoom={currentRoom}
+              onRoomChange={changeRoom}
+              onUserClick={handleNicknameClick}
+            />
           </div>
         </div>
 

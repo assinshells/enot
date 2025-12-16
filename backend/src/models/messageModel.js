@@ -29,6 +29,12 @@ const messageSchema = new mongoose.Schema(
       trim: true,
       maxlength: [1000, "Сообщение не должно превышать 1000 символов"],
     },
+    // Новое поле для приватных сообщений
+    recipient: {
+      type: String,
+      default: null,
+      trim: true,
+    },
     createdAt: {
       type: Date,
       default: Date.now,
@@ -43,6 +49,7 @@ const messageSchema = new mongoose.Schema(
 
 messageSchema.index({ room: 1, createdAt: -1 });
 messageSchema.index({ user: 1, room: 1 });
+messageSchema.index({ recipient: 1 });
 
 const Message = mongoose.model("Message", messageSchema);
 

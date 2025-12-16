@@ -37,7 +37,7 @@ export const getMessages = async (req, res, next) => {
 
 export const createMessage = async (req, res, next) => {
   try {
-    const { text, room } = req.body;
+    const { text, room, recipient } = req.body;
 
     if (!text || !text.trim()) {
       return res.status(400).json({
@@ -68,15 +68,26 @@ export const createMessage = async (req, res, next) => {
       });
     }
 
-    const message = await Message.create({
+    const messageData = {
       user: req.user._id,
       nickname: req.user.nickname,
       userColor: req.user.color || "black",
       room,
       text: text.trim(),
-    });
+    };
 
-    logger.info(`Сообщение создано: ${message._id} в комнате "${room}"`);
+    // Добавляем получателя, если указан
+    if (recipient && recipient.trim()) {
+      messageData.recipient = recipient.trim();
+    }
+
+    const message = await Message.create(messageData);
+
+    logger.info(
+      `Сообщение создано: ${message._id} в комнате "${room}"${
+        message.recipient ? ` для ${message.recipient}` : ""
+      }`
+    );
 
     sendMessageToRoom(room, "message:new", {
       _id: message._id,
@@ -85,6 +96,7 @@ export const createMessage = async (req, res, next) => {
       userColor: message.userColor,
       room: message.room,
       text: message.text,
+      recipient: message.recipient || null,
       createdAt: message.createdAt,
     });
 

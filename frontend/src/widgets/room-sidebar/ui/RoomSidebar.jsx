@@ -27,11 +27,19 @@ const RoomItem = memo(({ room, count, isActive, onClick }) => (
 
 RoomItem.displayName = "RoomItem";
 
-const UserItem = memo(({ user }) => {
+const UserItem = memo(({ user, onUserClick }) => {
   const userColor = getColorValue(user.color);
 
+  const handleClick = useCallback(() => {
+    onUserClick(user.nickname);
+  }, [user.nickname, onUserClick]);
+
   return (
-    <li className="list-group-item d-flex align-items-center">
+    <li
+      className="list-group-item d-flex align-items-center"
+      style={{ cursor: "pointer" }}
+      onClick={handleClick}
+    >
       <div
         className="rounded-circle me-2"
         style={{
@@ -47,7 +55,7 @@ const UserItem = memo(({ user }) => {
 
 UserItem.displayName = "UserItem";
 
-export const RoomSidebar = ({ currentRoom, onRoomChange }) => {
+export const RoomSidebar = ({ currentRoom, onRoomChange, onUserClick }) => {
   const [rooms, setRooms] = useState([]);
   const [counts, setCounts] = useState({});
   const [users, setUsers] = useState([]);
@@ -132,7 +140,11 @@ export const RoomSidebar = ({ currentRoom, onRoomChange }) => {
           {users.length > 0 ? (
             <ul className="list-group list-group-flush">
               {users.map((user) => (
-                <UserItem key={user._id} user={user} />
+                <UserItem
+                  key={user._id}
+                  user={user}
+                  onUserClick={onUserClick}
+                />
               ))}
             </ul>
           ) : (
