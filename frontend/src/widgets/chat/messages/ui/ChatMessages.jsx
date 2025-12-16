@@ -42,7 +42,7 @@ const MessageItem = memo(
           onClick={handleTimeClick}
           style={{ color: timeColor, cursor: "pointer" }}
         >
-          [{formatTime(message.createdAt)}]
+          {formatTime(message.createdAt)}
         </span>{" "}
         <span
           className={`message-sender ${!isMyMessage ? "clickable" : ""}`}
@@ -56,7 +56,7 @@ const MessageItem = memo(
         </span>
         {message.recipient && (
           <>
-            {" → "}
+            {" "}
             <span
               className="message-recipient"
               style={{
