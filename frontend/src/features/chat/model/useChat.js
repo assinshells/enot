@@ -1,11 +1,23 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { chatApi } from "@/entities/chat/api/chatApi";
 import { socketLib } from "@/shared/lib/socket/socket";
-import { roomUtils } from "@/shared/lib/utils/roomUtils";
-import { ROOM_NAMES } from "@/shared/config/rooms";
+import { ROOM_NAMES, DEFAULT_ROOM } from "@/shared/config/rooms";
+
+// Функция для получения сохранённой комнаты или дефолтной
+const getInitialRoom = () => {
+  try {
+    const savedRoom = sessionStorage.getItem("currentRoom");
+    if (savedRoom && ROOM_NAMES.includes(savedRoom)) {
+      return savedRoom;
+    }
+  } catch (e) {
+    console.error("Error reading from sessionStorage:", e);
+  }
+  return DEFAULT_ROOM;
+};
 
 export const useChat = () => {
-  const [currentRoom, setCurrentRoom] = useState(roomUtils.getInitialRoom);
+  const [currentRoom, setCurrentRoom] = useState(getInitialRoom);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
@@ -16,6 +28,17 @@ export const useChat = () => {
 
   const abortControllerRef = useRef(null);
   const roomChangeTimeoutRef = useRef(null);
+
+  // Сохраняем текущую комнату при изменении
+  useEffect(() => {
+    try {
+      if (currentRoom && ROOM_NAMES.includes(currentRoom)) {
+        sessionStorage.setItem("currentRoom", currentRoom);
+      }
+    } catch (e) {
+      console.error("Error saving to sessionStorage:", e);
+    }
+  }, [currentRoom]);
 
   const loadMessages = useCallback(async (room) => {
     if (abortControllerRef.current) {

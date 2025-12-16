@@ -4,40 +4,24 @@ import { useAuth } from "@/shared/lib/hooks/useAuth";
 import { getColorValue } from "@/shared/config/colors";
 import "./ChatMessages.css";
 
-// Стили для нового формата сообщений
-const messageStyles = `
-.message-list {
-  font-family: monospace;
-  font-size: 14px;
-  line-height: 1.8;
-}
-
-.message-item {
-  margin-bottom: 4px;
-  white-space: nowrap;
-  overflow-x: auto;
-}
-
-.clickable {
-  transition: opacity 0.2s;
-}
-
-.clickable:hover {
-  opacity: 0.7;
-  text-decoration: underline;
-}
-`;
-
 const MessageItem = memo(
-  ({ message, onTimeClick, onNicknameClick, currentUserId }) => {
+  ({
+    message,
+    onTimeClick,
+    onNicknameClick,
+    currentUserId,
+    currentUserNickname,
+  }) => {
     const isMyMessage = message.user === currentUserId;
-    const isToMe = message.recipient === currentUserId;
+    const isToMe = message.recipient === currentUserNickname;
 
-    const senderColor = isMyMessage ? "#dc3545" : "#6c757d";
+    // Цвета
+    const timeColor = "#6c757d"; // По умолчанию серый
+    const senderColor = isMyMessage ? "#dc3545" : "#6c757d"; // Красный если я, иначе серый
     const recipientColor = isToMe
       ? "#dc3545"
-      : getColorValue(message.userColor);
-    const messageColor = getColorValue(message.userColor);
+      : getColorValue(message.userColor); // Красный если мне, иначе цвет отправителя
+    const messageColor = getColorValue(message.userColor); // Цвет сообщения = цвет отправителя
 
     const handleTimeClick = (e) => {
       e.preventDefault();
@@ -51,24 +35,17 @@ const MessageItem = memo(
       }
     };
 
-    const handleRecipientClick = (e) => {
-      e.preventDefault();
-      if (message.recipient && !isToMe) {
-        onNicknameClick(message.recipient);
-      }
-    };
-
     return (
       <li className="message-item">
         <span
           className="message-time clickable"
           onClick={handleTimeClick}
-          style={{ color: "#6c757d", cursor: "pointer" }}
+          style={{ color: timeColor, cursor: "pointer" }}
         >
           [{formatTime(message.createdAt)}]
         </span>{" "}
         <span
-          className="message-sender clickable"
+          className={`message-sender ${!isMyMessage ? "clickable" : ""}`}
           onClick={handleSenderClick}
           style={{
             color: senderColor,
@@ -81,11 +58,10 @@ const MessageItem = memo(
           <>
             {" → "}
             <span
-              className="message-recipient clickable"
-              onClick={handleRecipientClick}
+              className="message-recipient"
               style={{
                 color: recipientColor,
-                cursor: isToMe ? "default" : "pointer",
+                cursor: "default",
               }}
             >
               {message.recipient}
@@ -148,6 +124,7 @@ export const ChatMessages = memo(
               onTimeClick={onTimeClick}
               onNicknameClick={onNicknameClick}
               currentUserId={user?._id}
+              currentUserNickname={user?.nickname}
             />
           ))}
         </ul>

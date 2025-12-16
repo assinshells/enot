@@ -7,13 +7,13 @@ export const ChatInput = ({
   recipientValue = "",
   messageValue = "",
 }) => {
-  const [recipient, setRecipient] = useState("");
   const [message, setMessage] = useState("");
+  const [recipientPlaceholder, setRecipientPlaceholder] = useState("");
 
   // Обновляем значения при изменении извне
   useEffect(() => {
     if (recipientValue) {
-      setRecipient(recipientValue);
+      setRecipientPlaceholder(recipientValue);
     }
   }, [recipientValue]);
 
@@ -30,17 +30,17 @@ export const ChatInput = ({
       const trimmedMessage = message.trim();
       if (!trimmedMessage || loading) return;
 
-      const trimmedRecipient = recipient.trim();
-
+      // Отправляем с получателем из placeholder
       onSendMessage({
         text: trimmedMessage,
-        recipient: trimmedRecipient || null,
+        recipient: recipientPlaceholder || null,
       });
 
       setMessage("");
-      // Не очищаем получателя, чтобы можно было отправить несколько сообщений подряд
+      // Очищаем placeholder после отправки
+      setRecipientPlaceholder("");
     },
-    [message, recipient, loading, onSendMessage]
+    [message, recipientPlaceholder, loading, onSendMessage]
   );
 
   const handleKeyDown = useCallback(
@@ -54,54 +54,42 @@ export const ChatInput = ({
   );
 
   const handleClearRecipient = useCallback(() => {
-    setRecipient("");
+    setRecipientPlaceholder("");
   }, []);
+
+  // Формируем placeholder для поля ввода
+  const inputPlaceholder = recipientPlaceholder
+    ? `Сообщение для ${recipientPlaceholder}...`
+    : "Введите сообщение...";
 
   return (
     <div className="chat-input-section p-3 border-top mb-0">
       <form onSubmit={handleSubmit}>
-        {/* Поле получателя */}
-        <div className="row g-2 mb-2">
+        <div className="row g-0 align-items-center">
           <div className="col">
-            <div className="input-group">
-              <span className="input-group-text">
-                <i className="bi bi-person"></i>
-              </span>
+            <div className="position-relative">
               <input
                 type="text"
-                className="form-control"
-                placeholder="Получатель (оставьте пустым для общего чата)"
-                value={recipient}
-                onChange={(e) => setRecipient(e.target.value)}
+                className="form-control form-control-lg bg-light border-light"
+                placeholder={inputPlaceholder}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyDown={handleKeyDown}
                 disabled={loading}
+                maxLength={MAX_MESSAGE_LENGTH}
               />
-              {recipient && (
+              {recipientPlaceholder && (
                 <button
                   type="button"
-                  className="btn btn-outline-secondary"
+                  className="btn btn-sm btn-link position-absolute top-50 end-0 translate-middle-y text-danger"
                   onClick={handleClearRecipient}
                   disabled={loading}
+                  title="Очистить получателя"
                 >
-                  <i className="bi bi-x"></i>
+                  <i className="bi bi-x-circle-fill"></i>
                 </button>
               )}
             </div>
-          </div>
-        </div>
-
-        {/* Поле сообщения */}
-        <div className="row g-0 align-items-center">
-          <div className="col">
-            <input
-              type="text"
-              className="form-control form-control-lg bg-light border-light"
-              placeholder="Введите сообщение..."
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={handleKeyDown}
-              disabled={loading}
-              maxLength={MAX_MESSAGE_LENGTH}
-            />
           </div>
           <div className="col-auto">
             <div className="chat-input-links ms-2">

@@ -35,12 +35,18 @@ export const ChatPage = () => {
     [sendMessage]
   );
 
+  // Вставляет время в поле ввода как текст сообщения
   const handleTimeClick = useCallback((time) => {
     setMessageValue(time);
+    // Сбрасываем после передачи
+    setTimeout(() => setMessageValue(""), 0);
   }, []);
 
+  // Подставляет никнейм как placeholder для получателя
   const handleNicknameClick = useCallback((nickname) => {
     setRecipientValue(nickname);
+    // Сбрасываем после передачи
+    setTimeout(() => setRecipientValue(""), 0);
   }, []);
 
   const handleCloseError = useCallback(() => {
