@@ -10,7 +10,6 @@ import {
   ColorPicker,
   GenderPicker,
 } from "@/shared/ui";
-import { roomUtils } from "@/shared/lib/utils/roomUtils";
 
 export const EmailConfirmationForm = () => {
   const navigate = useNavigate();
@@ -55,7 +54,9 @@ export const EmailConfirmationForm = () => {
 
         await registerUser(registrationData);
 
-        roomUtils.saveRoom(room);
+        // Сохраняем выбранную комнату ПЕРЕД переходом
+        sessionStorage.setItem("currentRoom", room);
+
         navigate("/");
       } catch (err) {
         setError(err);

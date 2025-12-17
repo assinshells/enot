@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/shared/lib/hooks/useAuth";
 import { useRoomForm } from "@/shared/lib/hooks/useRoomForm";
 import { useFormError } from "@/shared/lib/hooks/useFormError";
-import { roomUtils } from "@/shared/lib/utils/roomUtils";
 import { Input, Button, Alert, Card } from "@/shared/ui";
 
 export const LoginForm = () => {
@@ -38,11 +37,16 @@ export const LoginForm = () => {
       setLoading(true);
 
       try {
+        // Сохраняем выбранную комнату ПЕРЕД авторизацией
+        sessionStorage.setItem("currentRoom", selectedRoom);
+
         await loginUser(formData);
-        roomUtils.saveRoom(selectedRoom);
+
+        // После успешной авторизации переходим в чат
         navigate("/");
       } catch (err) {
         if (err.message === "user_not_found") {
+          // Передаём выбранную комнату в состояние для регистрации
           navigate("/email-confirmation", {
             state: {
               nickname: formData.nickname,
@@ -100,8 +104,7 @@ export const LoginForm = () => {
           <div className="mb-3">
             <div className="mb-3 bg-soft-light rounded-3">
               <select
-                className="form-select border-light
-                bg-soft-light"
+                className="form-select border-light bg-soft-light"
                 value={selectedRoom}
                 onChange={(e) => setSelectedRoom(e.target.value)}
                 required

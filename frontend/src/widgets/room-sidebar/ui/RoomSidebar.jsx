@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, memo, useCallback } from "react";
 import { socketLib } from "@/shared/lib/socket/socket";
 import { getColorValue } from "@/shared/config/colors";
+import { useAuth } from "@/shared/lib/hooks/useAuth";
 import "./RoomSidebar.css";
 
 const RoomItem = memo(({ room, count, isActive, onClick }) => (
@@ -27,17 +28,24 @@ const RoomItem = memo(({ room, count, isActive, onClick }) => (
 
 RoomItem.displayName = "RoomItem";
 
-const UserItem = memo(({ user, onUserClick }) => {
+const UserItem = memo(({ user, onUserClick, isCurrentUser }) => {
   const userColor = getColorValue(user.color);
 
   const handleClick = useCallback(() => {
-    onUserClick(user.nickname);
-  }, [user.nickname, onUserClick]);
+    if (!isCurrentUser) {
+      onUserClick(user.nickname);
+    }
+  }, [user.nickname, onUserClick, isCurrentUser]);
 
   return (
     <li
-      className="list-group-item d-flex align-items-center"
-      style={{ cursor: "pointer" }}
+      className={`list-group-item d-flex align-items-center ${
+        isCurrentUser ? "text-muted" : ""
+      }`}
+      style={{
+        cursor: isCurrentUser ? "default" : "pointer",
+        opacity: isCurrentUser ? 0.7 : 1,
+      }}
       onClick={handleClick}
     >
       <div
@@ -48,17 +56,65 @@ const UserItem = memo(({ user, onUserClick }) => {
           backgroundColor: userColor,
         }}
       ></div>
-      <span style={{ color: userColor }}>{user.nickname}</span>
+      <span style={{ color: isCurrentUser ? "#6c757d" : userColor }}>
+        {user.nickname}
+        {isCurrentUser && <small className="ms-2">(вы)</small>}
+      </span>
     </li>
   );
 });
 
 UserItem.displayName = "UserItem";
 
+const GenderTab = memo(({ gender, count, isActive, onClick }) => {
+  const icons = {
+    male: "bi-gender-male",
+    female: "bi-gender-female",
+    unknown: "bi-question-circle",
+  };
+
+  const labels = {
+    male: "М",
+    female: "Ж",
+    unknown: "?",
+  };
+
+  return (
+    <button
+      className={`btn btn-sm ${
+        isActive ? "btn-primary" : "btn-outline-secondary"
+      } flex-fill`}
+      onClick={onClick}
+      style={{ fontSize: "0.85rem" }}
+    >
+      <i className={`${icons[gender]} me-1`}></i>
+      {labels[gender]}
+      <span className="badge bg-light text-dark ms-1">{count}</span>
+    </button>
+  );
+});
+
+GenderTab.displayName = "GenderTab";
+
 export const RoomSidebar = ({ currentRoom, onRoomChange, onUserClick }) => {
+  const { user } = useAuth();
   const [rooms, setRooms] = useState([]);
   const [counts, setCounts] = useState({});
   const [users, setUsers] = useState([]);
+  const [activeGenderFilter, setActiveGenderFilter] = useState("all");
+
+  const genderCounts = useMemo(() => {
+    return {
+      male: users.filter((u) => u.gender === "male").length,
+      female: users.filter((u) => u.gender === "female").length,
+      unknown: users.filter((u) => u.gender === "unknown").length,
+    };
+  }, [users]);
+
+  const filteredUsers = useMemo(() => {
+    if (activeGenderFilter === "all") return users;
+    return users.filter((u) => u.gender === activeGenderFilter);
+  }, [users, activeGenderFilter]);
 
   const totalUsers = useMemo(() => {
     return Object.values(counts).reduce((sum, count) => sum + count, 0);
@@ -72,6 +128,10 @@ export const RoomSidebar = ({ currentRoom, onRoomChange, onUserClick }) => {
     },
     [currentRoom, onRoomChange]
   );
+
+  const handleGenderTabClick = useCallback((gender) => {
+    setActiveGenderFilter(gender);
+  }, []);
 
   useEffect(() => {
     const socket = socketLib.getSocket();
@@ -106,13 +166,13 @@ export const RoomSidebar = ({ currentRoom, onRoomChange, onUserClick }) => {
 
   return (
     <aside className="room-sidebar border-start d-flex flex-column">
-      <div className="rooms-section border-bottom" style={{ flex: "0 0 30%" }}>
+      <div className="rooms-section border-bottom" style={{ flex: "0 0 auto" }}>
         <div className="p-3 border-bottom bg-light">
           <h6 className="mb-0">
             <i className="bi bi-door-open me-2"></i>Комнаты
           </h6>
         </div>
-        <div className="overflow-auto h-100">
+        <div className="overflow-auto" style={{ maxHeight: "30vh" }}>
           <ul className="list-group list-group-flush">
             {rooms.map((room) => (
               <RoomItem
@@ -127,23 +187,56 @@ export const RoomSidebar = ({ currentRoom, onRoomChange, onUserClick }) => {
         </div>
       </div>
 
-      <div
-        className="users-section d-flex flex-column"
-        style={{ flex: "1 1 70%" }}
-      >
+      <div className="users-section d-flex flex-column flex-grow-1">
         <div className="p-3 border-bottom bg-light">
-          <h6 className="mb-0">
-            <i className="bi bi-people-fill me-2"></i>В чате: {totalUsers}
-          </h6>
+          <div className="d-flex justify-content-between align-items-center mb-2">
+            <h6 className="mb-0">
+              <i className="bi bi-people-fill me-2"></i>В чате: {totalUsers}
+            </h6>
+            <button
+              className={`btn btn-sm ${
+                activeGenderFilter === "all"
+                  ? "btn-primary"
+                  : "btn-outline-secondary"
+              }`}
+              onClick={() => handleGenderTabClick("all")}
+              style={{ fontSize: "0.75rem", padding: "0.25rem 0.5rem" }}
+            >
+              Все
+            </button>
+          </div>
+
+          <div className="btn-group w-100" role="group">
+            <GenderTab
+              gender="male"
+              count={genderCounts.male}
+              isActive={activeGenderFilter === "male"}
+              onClick={() => handleGenderTabClick("male")}
+            />
+            <GenderTab
+              gender="female"
+              count={genderCounts.female}
+              isActive={activeGenderFilter === "female"}
+              onClick={() => handleGenderTabClick("female")}
+            />
+            <GenderTab
+              gender="unknown"
+              count={genderCounts.unknown}
+              isActive={activeGenderFilter === "unknown"}
+              onClick={() => handleGenderTabClick("unknown")}
+            />
+          </div>
         </div>
+
         <div className="overflow-auto flex-grow-1">
-          {users.length > 0 ? (
+          {filteredUsers.length > 0 ? (
             <ul className="list-group list-group-flush">
-              {users.map((user) => (
+              {filteredUsers.map((listUser) => (
                 <UserItem
-                  key={user._id}
-                  user={user}
+                  key={listUser._id}
+                  user={listUser}
                   onUserClick={onUserClick}
+                  isCurrentUser={user?._id === listUser._id}
                 />
               ))}
             </ul>
