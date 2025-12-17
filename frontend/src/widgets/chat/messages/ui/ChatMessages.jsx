@@ -1,8 +1,10 @@
 import { useEffect, useRef, memo } from "react";
 import { formatTime } from "@/shared/lib/utils/formatTime";
-import { useAuth } from "@/shared/lib/hooks/useAuth";
 import { getColorValue } from "@/shared/config/colors";
 import "./ChatMessages.css";
+
+const TIME_COLOR = "#6c757d";
+const MY_MESSAGE_COLOR = "#dc3545";
 
 const MessageItem = memo(
   ({
@@ -15,13 +17,11 @@ const MessageItem = memo(
     const isMyMessage = message.user === currentUserId;
     const isToMe = message.recipient === currentUserNickname;
 
-    // Цвета
-    const timeColor = "#6c757d"; // По умолчанию серый
-    const senderColor = isMyMessage ? "#dc3545" : "#6c757d"; // Красный если я, иначе серый
+    const senderColor = isMyMessage ? MY_MESSAGE_COLOR : TIME_COLOR;
     const recipientColor = isToMe
-      ? "#dc3545"
-      : getColorValue(message.userColor); // Красный если мне, иначе цвет отправителя
-    const messageColor = getColorValue(message.userColor); // Цвет сообщения = цвет отправителя
+      ? MY_MESSAGE_COLOR
+      : getColorValue(message.userColor);
+    const messageColor = getColorValue(message.userColor);
 
     const handleTimeClick = (e) => {
       e.preventDefault();
@@ -40,7 +40,7 @@ const MessageItem = memo(
         <span
           className="message-time clickable"
           onClick={handleTimeClick}
-          style={{ color: timeColor, cursor: "pointer" }}
+          style={{ color: TIME_COLOR, cursor: "pointer" }}
         >
           {formatTime(message.createdAt)}
         </span>{" "}
@@ -59,10 +59,7 @@ const MessageItem = memo(
             {" "}
             <span
               className="message-recipient"
-              style={{
-                color: recipientColor,
-                cursor: "default",
-              }}
+              style={{ color: recipientColor }}
             >
               {message.recipient}
             </span>
@@ -98,21 +95,22 @@ const EmptyState = memo(() => (
 EmptyState.displayName = "EmptyState";
 
 export const ChatMessages = memo(
-  ({ messages, loading, onTimeClick, onNicknameClick }) => {
-    const { user } = useAuth();
+  ({
+    messages,
+    loading,
+    onTimeClick,
+    onNicknameClick,
+    currentUserId,
+    currentUserNickname,
+  }) => {
     const messagesEndRef = useRef(null);
 
     useEffect(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
-    if (loading) {
-      return <LoadingSpinner />;
-    }
-
-    if (!messages || messages.length === 0) {
-      return <EmptyState />;
-    }
+    if (loading) return <LoadingSpinner />;
+    if (!messages || messages.length === 0) return <EmptyState />;
 
     return (
       <div className="chat-messages p-3">
@@ -123,8 +121,8 @@ export const ChatMessages = memo(
               message={message}
               onTimeClick={onTimeClick}
               onNicknameClick={onNicknameClick}
-              currentUserId={user?._id}
-              currentUserNickname={user?.nickname}
+              currentUserId={currentUserId}
+              currentUserNickname={currentUserNickname}
             />
           ))}
         </ul>

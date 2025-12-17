@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/shared/lib/hooks/useAuth";
 import { useRoomForm } from "@/shared/lib/hooks/useRoomForm";
 import { useFormError } from "@/shared/lib/hooks/useFormError";
+import { useSessionStorage } from "@/shared/lib/hooks/useSessionStorage";
 import { Input, Button, Alert, Card } from "@/shared/ui";
 
 export const LoginForm = () => {
@@ -11,11 +12,9 @@ export const LoginForm = () => {
   const { selectedRoom, setSelectedRoom, availableRooms, validateRoom } =
     useRoomForm();
   const { error, setError, clearError } = useFormError();
+  const [, setCurrentRoom] = useSessionStorage("currentRoom", "");
 
-  const [formData, setFormData] = useState({
-    nickname: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState({ nickname: "", password: "" });
   const [loading, setLoading] = useState(false);
 
   const handleChange = useCallback((e) => {
@@ -37,16 +36,11 @@ export const LoginForm = () => {
       setLoading(true);
 
       try {
-        // Сохраняем выбранную комнату ПЕРЕД авторизацией
-        sessionStorage.setItem("currentRoom", selectedRoom);
-
+        setCurrentRoom(selectedRoom);
         await loginUser(formData);
-
-        // После успешной авторизации переходим в чат
         navigate("/");
       } catch (err) {
         if (err.message === "user_not_found") {
-          // Передаём выбранную комнату в состояние для регистрации
           navigate("/email-confirmation", {
             state: {
               nickname: formData.nickname,
@@ -69,6 +63,7 @@ export const LoginForm = () => {
       navigate,
       setError,
       clearError,
+      setCurrentRoom,
     ]
   );
 
@@ -78,48 +73,45 @@ export const LoginForm = () => {
         {error && <Alert type="danger">{error}</Alert>}
 
         <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <div className="mb-3 bg-soft-light rounded-3">
-              <Input
-                name="nickname"
-                placeholder="Никнейм"
-                value={formData.nickname}
-                onChange={handleChange}
-                required
-              />
-            </div>
+          <div className="mb-3 bg-soft-light rounded-3">
+            <Input
+              name="nickname"
+              placeholder="Никнейм"
+              value={formData.nickname}
+              onChange={handleChange}
+              required
+            />
           </div>
-          <div className="mb-3">
-            <div className="mb-3 bg-soft-light rounded-3">
-              <Input
-                type="password"
-                name="password"
-                placeholder="Пароль"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
-            </div>
+
+          <div className="mb-3 bg-soft-light rounded-3">
+            <Input
+              type="password"
+              name="password"
+              placeholder="Пароль"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
           </div>
-          <div className="mb-3">
-            <div className="mb-3 bg-soft-light rounded-3">
-              <select
-                className="form-select border-light bg-soft-light"
-                value={selectedRoom}
-                onChange={(e) => setSelectedRoom(e.target.value)}
-                required
-              >
-                <option value="" disabled>
-                  Выберите комнату...
+
+          <div className="mb-3 bg-soft-light rounded-3">
+            <select
+              className="form-select border-light bg-soft-light"
+              value={selectedRoom}
+              onChange={(e) => setSelectedRoom(e.target.value)}
+              required
+            >
+              <option value="" disabled>
+                Выберите комнату...
+              </option>
+              {availableRooms.map((room) => (
+                <option key={room} value={room}>
+                  {room}
                 </option>
-                {availableRooms.map((room) => (
-                  <option key={room} value={room}>
-                    {room}
-                  </option>
-                ))}
-              </select>
-            </div>
+              ))}
+            </select>
           </div>
+
           <div className="d-grid">
             <Button type="submit" loading={loading} fullWidth>
               Войти
@@ -127,6 +119,7 @@ export const LoginForm = () => {
           </div>
         </form>
       </Card>
+
       <div className="mt-5 text-center">
         <p>Новый пользователь? Просто введите никнейм и пароль</p>
         <p>

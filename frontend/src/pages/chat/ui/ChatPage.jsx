@@ -5,10 +5,12 @@ import { ChatMessages } from "@/widgets/chat/messages/ui/ChatMessages";
 import { ChatInput } from "@/widgets/chat/input/ui/ChatInput";
 import { SettingsModal } from "@/widgets/modals/settings/ui/SettingsModal";
 import { useChat } from "@/features/chat/model/useChat";
+import { useAuth } from "@/shared/lib/hooks/useAuth";
 import { Alert } from "@/shared/ui";
 import "./ChatPage.css";
 
 export const ChatPage = () => {
+  const { user } = useAuth();
   const {
     currentRoom,
     messages,
@@ -20,7 +22,6 @@ export const ChatPage = () => {
   } = useChat();
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [localError, setLocalError] = useState(error);
   const [recipientValue, setRecipientValue] = useState("");
   const [messageValue, setMessageValue] = useState("");
 
@@ -35,42 +36,26 @@ export const ChatPage = () => {
     [sendMessage]
   );
 
-  // Вставляет время в поле ввода как текст сообщения
   const handleTimeClick = useCallback((time) => {
     setMessageValue(time);
-    // Сбрасываем после передачи
     setTimeout(() => setMessageValue(""), 0);
   }, []);
 
-  // Подставляет никнейм как placeholder для получателя
   const handleNicknameClick = useCallback((nickname) => {
     setRecipientValue(nickname);
-    // Сбрасываем после передачи
     setTimeout(() => setRecipientValue(""), 0);
-  }, []);
-
-  const handleCloseError = useCallback(() => {
-    setLocalError(null);
-  }, []);
-
-  const handleOpenSettings = useCallback(() => {
-    setIsSettingsOpen(true);
-  }, []);
-
-  const handleCloseSettings = useCallback(() => {
-    setIsSettingsOpen(false);
   }, []);
 
   return (
     <>
       <div className="layout-wrapper d-lg-flex">
-        <LeftSidebarMenu onOpenSettings={handleOpenSettings} />
+        <LeftSidebarMenu onOpenSettings={() => setIsSettingsOpen(true)} />
 
         <div className="user-chat w-100 overflow-hidden d-flex flex-column">
-          {localError && (
+          {error && (
             <div className="p-3">
-              <Alert type="danger" onClose={handleCloseError}>
-                {localError}
+              <Alert type="danger" onClose={() => {}}>
+                {error}
               </Alert>
             </div>
           )}
@@ -83,6 +68,8 @@ export const ChatPage = () => {
                   loading={loading}
                   onTimeClick={handleTimeClick}
                   onNicknameClick={handleNicknameClick}
+                  currentUserId={user?._id}
+                  currentUserNickname={user?.nickname}
                 />
               </div>
               <ChatInput
@@ -101,7 +88,10 @@ export const ChatPage = () => {
           </div>
         </div>
 
-        <SettingsModal isOpen={isSettingsOpen} onClose={handleCloseSettings} />
+        <SettingsModal
+          isOpen={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
+        />
       </div>
     </>
   );
