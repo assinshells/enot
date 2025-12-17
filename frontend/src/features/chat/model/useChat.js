@@ -23,8 +23,8 @@ export const useChat = () => {
   const isConnected = useSocketConnection();
   const emit = useSocketEmit();
   const abortControllerRef = useRef(null);
+  const messageIdsRef = useRef(new Set());
 
-  // Загрузка сообщений (стабильная функция)
   const loadMessages = useCallback(async (room) => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -36,13 +36,16 @@ export const useChat = () => {
     try {
       setLoading(true);
       setError(null);
+      messageIdsRef.current.clear();
 
       const response = await chatApi.getMessages(room, {
         signal: controller.signal,
       });
 
       if (!controller.signal.aborted) {
-        setMessages(response.data || []);
+        const msgs = response.data || [];
+        msgs.forEach((msg) => messageIdsRef.current.add(msg._id));
+        setMessages(msgs);
       }
     } catch (err) {
       if (err.name === "CanceledError" || err.name === "AbortError") {
@@ -58,9 +61,8 @@ export const useChat = () => {
         setLoading(false);
       }
     }
-  }, []); // Нет зависимостей - функция стабильна
+  }, []);
 
-  // Смена комнаты
   const changeRoom = useCallback(
     (newRoom) => {
       if (newRoom === currentRoom || !ROOM_NAMES.includes(newRoom)) {
@@ -69,6 +71,7 @@ export const useChat = () => {
 
       setLoading(true);
       setMessages([]);
+      messageIdsRef.current.clear();
       emit("room:leave");
 
       setTimeout(() => {
@@ -79,7 +82,6 @@ export const useChat = () => {
     [currentRoom, emit, setCurrentRoom]
   );
 
-  // Отправка сообщения
   const sendMessage = useCallback(
     async (text, recipient = null) => {
       const trimmedText = text.trim();
@@ -107,12 +109,10 @@ export const useChat = () => {
     [currentRoom]
   );
 
-  // Socket.IO обработчики
   useSocketEvent(
     "room:joined",
     useCallback(
       ({ room, counts: newCounts }) => {
-        console.log(`✅ Joined room: ${room}`);
         setCounts(newCounts);
         loadMessages(room);
       },
@@ -137,11 +137,10 @@ export const useChat = () => {
     useCallback(
       (message) => {
         if (message.room !== currentRoom) return;
+        if (messageIdsRef.current.has(message._id)) return;
 
-        setMessages((prev) => {
-          if (prev.some((m) => m._id === message._id)) return prev;
-          return [...prev, message];
-        });
+        messageIdsRef.current.add(message._id);
+        setMessages((prev) => [...prev, message]);
       },
       [currentRoom]
     )
@@ -156,14 +155,12 @@ export const useChat = () => {
     }, [])
   );
 
-  // Подключение к комнате при старте
   useEffect(() => {
     if (isConnected && ROOM_NAMES.includes(currentRoom)) {
       emit("room:join", { room: currentRoom });
     }
   }, [isConnected, currentRoom, emit]);
 
-  // Cleanup
   useEffect(() => {
     return () => {
       if (abortControllerRef.current) {

@@ -27,6 +27,7 @@ export const initSocket = (server) => {
       socket.userId = user._id.toString();
       socket.nickname = user.nickname;
       socket.userColor = user.color || "black";
+      socket.userGender = user.gender || "unknown";
       next();
     } catch (error) {
       logger.error("Socket auth error:", error);
@@ -36,8 +37,6 @@ export const initSocket = (server) => {
 
   io.on("connection", (socket) => {
     logger.info(`✅ ${socket.nickname} connected (${socket.id})`);
-
-    // ========== ROOM EVENTS ==========
 
     socket.on("room:join", async ({ room }) => {
       try {
@@ -53,7 +52,6 @@ export const initSocket = (server) => {
 
         io.emit("room:counts", counts);
 
-        // Отправляем список пользователей в комнате
         const users = await getUsersInRoom(room);
         io.to(room).emit("room:users", users);
       } catch (error) {
@@ -75,7 +73,6 @@ export const initSocket = (server) => {
 
       io.emit("room:counts", counts);
 
-      // Обновляем список пользователей
       const users = await getUsersInRoom(room);
       io.to(room).emit("room:users", users);
     });
@@ -83,8 +80,6 @@ export const initSocket = (server) => {
     socket.on("room:list", () => {
       socket.emit("room:list", roomManager.getAvailableRooms());
     });
-
-    // ========== DISCONNECT ==========
 
     socket.on("disconnect", async () => {
       const room = roomManager.getUserRoom(socket.userId);
@@ -100,7 +95,6 @@ export const initSocket = (server) => {
 
         io.emit("room:counts", counts);
 
-        // Обновляем список пользователей
         const users = await getUsersInRoom(room);
         io.to(room).emit("room:users", users);
       }
@@ -123,7 +117,7 @@ async function getUsersInRoom(roomName) {
   const userIds = sockets.map((s) => s.userId);
 
   const users = await User.find({ _id: { $in: userIds } }).select(
-    "nickname color"
+    "nickname color gender"
   );
 
   return users;

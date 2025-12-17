@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { MAX_MESSAGE_LENGTH } from "@/shared/config/constants";
 
 export const ChatInput = ({
@@ -9,8 +9,8 @@ export const ChatInput = ({
 }) => {
   const [message, setMessage] = useState("");
   const [recipientPlaceholder, setRecipientPlaceholder] = useState("");
+  const inputRef = useRef(null);
 
-  // Обновляем значения при изменении извне
   useEffect(() => {
     if (recipientValue) {
       setRecipientPlaceholder(recipientValue);
@@ -19,7 +19,25 @@ export const ChatInput = ({
 
   useEffect(() => {
     if (messageValue) {
-      setMessage(messageValue);
+      const input = inputRef.current;
+      if (!input) return;
+
+      const start = input.selectionStart || 0;
+      const end = input.selectionEnd || 0;
+      const currentText = message;
+
+      const newText =
+        currentText.substring(0, start) +
+        messageValue +
+        currentText.substring(end);
+
+      setMessage(newText);
+
+      setTimeout(() => {
+        const newCursorPos = start + messageValue.length;
+        input.setSelectionRange(newCursorPos, newCursorPos);
+        input.focus();
+      }, 0);
     }
   }, [messageValue]);
 
@@ -30,14 +48,12 @@ export const ChatInput = ({
       const trimmedMessage = message.trim();
       if (!trimmedMessage || loading) return;
 
-      // Отправляем с получателем из placeholder
       onSendMessage({
         text: trimmedMessage,
         recipient: recipientPlaceholder || null,
       });
 
       setMessage("");
-      // Очищаем placeholder после отправки
       setRecipientPlaceholder("");
     },
     [message, recipientPlaceholder, loading, onSendMessage]
@@ -57,7 +73,6 @@ export const ChatInput = ({
     setRecipientPlaceholder("");
   }, []);
 
-  // Формируем placeholder для поля ввода
   const inputPlaceholder = recipientPlaceholder
     ? `Сообщение для ${recipientPlaceholder}...`
     : "Введите сообщение...";
@@ -69,6 +84,7 @@ export const ChatInput = ({
           <div className="col">
             <div className="position-relative">
               <input
+                ref={inputRef}
                 type="text"
                 className="form-control form-control-lg bg-light border-light"
                 placeholder={inputPlaceholder}

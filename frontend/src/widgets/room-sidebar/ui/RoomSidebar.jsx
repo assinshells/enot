@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, memo, useCallback } from "react";
 import { socketLib } from "@/shared/lib/socket/socket";
 import { getColorValue } from "@/shared/config/colors";
 import { useAuth } from "@/shared/lib/hooks/useAuth";
+import { useGenderFilter } from "@/shared/lib/hooks/useGenderFilter";
 import "./RoomSidebar.css";
 
 const RoomItem = memo(({ room, count, isActive, onClick }) => (
@@ -101,20 +102,9 @@ export const RoomSidebar = ({ currentRoom, onRoomChange, onUserClick }) => {
   const [rooms, setRooms] = useState([]);
   const [counts, setCounts] = useState({});
   const [users, setUsers] = useState([]);
-  const [activeGenderFilter, setActiveGenderFilter] = useState("all");
 
-  const genderCounts = useMemo(() => {
-    return {
-      male: users.filter((u) => u.gender === "male").length,
-      female: users.filter((u) => u.gender === "female").length,
-      unknown: users.filter((u) => u.gender === "unknown").length,
-    };
-  }, [users]);
-
-  const filteredUsers = useMemo(() => {
-    if (activeGenderFilter === "all") return users;
-    return users.filter((u) => u.gender === activeGenderFilter);
-  }, [users, activeGenderFilter]);
+  const { activeFilter, setActiveFilter, genderCounts, filteredUsers } =
+    useGenderFilter(users, user?.gender);
 
   const totalUsers = useMemo(() => {
     return Object.values(counts).reduce((sum, count) => sum + count, 0);
@@ -128,10 +118,6 @@ export const RoomSidebar = ({ currentRoom, onRoomChange, onUserClick }) => {
     },
     [currentRoom, onRoomChange]
   );
-
-  const handleGenderTabClick = useCallback((gender) => {
-    setActiveGenderFilter(gender);
-  }, []);
 
   useEffect(() => {
     const socket = socketLib.getSocket();
@@ -149,6 +135,7 @@ export const RoomSidebar = ({ currentRoom, onRoomChange, onUserClick }) => {
     };
 
     const handleRoomUsers = (data) => {
+      console.log("📥 Received users data:", data);
       setUsers(data);
     };
 
@@ -195,11 +182,9 @@ export const RoomSidebar = ({ currentRoom, onRoomChange, onUserClick }) => {
             </h6>
             <button
               className={`btn btn-sm ${
-                activeGenderFilter === "all"
-                  ? "btn-primary"
-                  : "btn-outline-secondary"
+                activeFilter === "all" ? "btn-primary" : "btn-outline-secondary"
               }`}
-              onClick={() => handleGenderTabClick("all")}
+              onClick={() => setActiveFilter("all")}
               style={{ fontSize: "0.75rem", padding: "0.25rem 0.5rem" }}
             >
               Все
@@ -210,20 +195,20 @@ export const RoomSidebar = ({ currentRoom, onRoomChange, onUserClick }) => {
             <GenderTab
               gender="male"
               count={genderCounts.male}
-              isActive={activeGenderFilter === "male"}
-              onClick={() => handleGenderTabClick("male")}
+              isActive={activeFilter === "male"}
+              onClick={() => setActiveFilter("male")}
             />
             <GenderTab
               gender="female"
               count={genderCounts.female}
-              isActive={activeGenderFilter === "female"}
-              onClick={() => handleGenderTabClick("female")}
+              isActive={activeFilter === "female"}
+              onClick={() => setActiveFilter("female")}
             />
             <GenderTab
               gender="unknown"
               count={genderCounts.unknown}
-              isActive={activeGenderFilter === "unknown"}
-              onClick={() => handleGenderTabClick("unknown")}
+              isActive={activeFilter === "unknown"}
+              onClick={() => setActiveFilter("unknown")}
             />
           </div>
         </div>
