@@ -70,8 +70,10 @@ export const initSocket = (server) => {
     socket.on("room:join", async ({ room }) => {
       try {
         const oldRoom = roomManager.getUserRoom(socket.userId);
+        const user = await User.findById(socket.userId).select(
+          "nickname color gender"
+        );
 
-        // Если уже в этой комнате - игнорируем
         if (oldRoom === room) {
           socket.emit("room:joined", {
             room,
@@ -80,15 +82,6 @@ export const initSocket = (server) => {
           return;
         }
 
-        const counts = roomManager.joinRoom(socket, socket.userId, room);
-
-        socket.emit("room:joined", { room, counts });
-
-        const user = await User.findById(socket.userId).select(
-          "nickname color gender"
-        );
-
-        // Если переход из другой комнаты - создаём сообщение о переходе в старой
         if (oldRoom) {
           const switchMessage = await createSystemMessage(
             SYSTEM_MESSAGE_TYPES.SWITCH,
@@ -112,7 +105,9 @@ export const initSocket = (server) => {
           io.to(oldRoom).emit("room:users", oldRoomUsers);
         }
 
-        // Сообщение о входе в новую комнату
+        const counts = roomManager.joinRoom(socket, socket.userId, room);
+        socket.emit("room:joined", { room, counts });
+
         const joinMessage = await createSystemMessage(
           SYSTEM_MESSAGE_TYPES.JOIN,
           [user],
@@ -135,6 +130,7 @@ export const initSocket = (server) => {
         const users = await getUsersInRoom(room);
         io.to(room).emit("room:users", users);
       } catch (error) {
+        logger.error(`Error in room:join: ${error.message}`);
         socket.emit("error", { message: error.message });
       }
     });
@@ -144,9 +140,6 @@ export const initSocket = (server) => {
       if (!room) return;
 
       const counts = roomManager.leaveRoom(socket, socket.userId);
-
-      // НЕ создаём системное сообщение при явном room:leave
-      // Оно будет создано при переходе в другую комнату или disconnect
 
       io.emit("room:counts", counts);
 

@@ -23,7 +23,9 @@ export const LeftSidebarMenu = ({ onOpenSettings }) => {
 
   return (
     <>
+      {/* start left sidebar-menu */}
       <div className="side-menu flex-lg-column me-lg-1 ms-lg-0">
+        {/* start navbar-brand-box */}
         <div className="navbar-brand-box">
           <a href="#" className="logo logo-dark">
             <span className="logo-sm">
@@ -37,23 +39,49 @@ export const LeftSidebarMenu = ({ onOpenSettings }) => {
             </span>
           </a>
         </div>
+        {/* end navbar-brand-box */}
+
+        {/* start side-menu nav*/}
         <div className="flex-lg-column my-auto">
           <ul
             className="nav nav-pills side-menu-nav justify-content-center"
             role="tablist"
           >
-            <li className="nav-item">
-              <button
+            <li className="nav-item" title="Profile">
+              <a
                 className="nav-link"
-                onClick={handleSettingsClick}
-                title="Настройки"
-                type="button"
+                id="pills-user-tab"
+                data-bs-toggle="pill"
+                href="#pills-user"
+                role="tab"
               >
-                <i className="bi bi-gear"></i>
-              </button>
+                <i className="bi bi-person"></i>
+              </a>
+            </li>
+            <li className="nav-item" title="Chat">
+              <a
+                className="nav-link"
+                id="pills-rooms-tab"
+                data-bs-toggle="pill"
+                href="#pills-rooms"
+                role="tab"
+              >
+                <i className="bi bi-chat-right-dots"></i>
+              </a>
+            </li>
+            <li className="nav-item" title="Users">
+              <a
+                className="nav-link"
+                id="pills-users-tab"
+                data-bs-toggle="pill"
+                href="#pills-users"
+                role="tab"
+              >
+                <i className="bi bi-people"></i>
+              </a>
             </li>
 
-            {/* Mobile Dropdown */}
+            {/* start Mobile Dropdown */}
             <li className="nav-item dropdown profile-user-dropdown d-inline-block d-lg-none">
               <a
                 className="nav-link dropdown-toggle no-caret"
@@ -63,15 +91,11 @@ export const LeftSidebarMenu = ({ onOpenSettings }) => {
                 aria-haspopup="true"
                 aria-expanded="false"
               >
-                <i className="bi bi-list"></i>
+                <i className="bi bi-three-dots"></i>
               </a>
               <div className="dropdown-menu">
-                <a
-                  className="dropdown-item"
-                  href="#"
-                  onClick={handleSettingsClick}
-                >
-                  Setting <i className="bi bi-gear float-end text-muted"></i>
+                <a className="dropdown-item" href="#">
+                  Profile <i className="bi bi-person float-end text-muted"></i>
                 </a>
                 <div className="dropdown-divider"></div>
                 <a className="dropdown-item" href="#" onClick={handleLogout}>
@@ -80,10 +104,12 @@ export const LeftSidebarMenu = ({ onOpenSettings }) => {
                 </a>
               </div>
             </li>
+            {/* end Mobile Dropdown */}
           </ul>
         </div>
+        {/* end side-menu nav */}
 
-        {/* Desktop Bottom Menu */}
+        {/* start Desktop Bottom Menu */}
         <div className="flex-lg-column d-none d-lg-block">
           <ul className="nav side-menu-nav justify-content-center">
             <li className="nav-item btn-group dropup profile-user-dropdown">
@@ -95,17 +121,13 @@ export const LeftSidebarMenu = ({ onOpenSettings }) => {
                 aria-haspopup="true"
                 aria-expanded="false"
               >
-                <i className="bi bi-list"></i>
+                <i className="bi bi-three-dots"></i>
               </a>
 
               <div className="dropdown-menu">
-                <a
-                  className="dropdown-item"
-                  href="#"
-                  onClick={handleSettingsClick}
-                >
-                  Setting
-                  <i className="bi bi-gear float-end text-muted"></i>
+                <a className="dropdown-item" href="#">
+                  Profile
+                  <i className="bi bi-person float-end text-muted"></i>
                 </a>
                 <div className="dropdown-divider"></div>
                 <a className="dropdown-item" href="#" onClick={handleLogout}>
@@ -116,7 +138,9 @@ export const LeftSidebarMenu = ({ onOpenSettings }) => {
             </li>
           </ul>
         </div>
+        {/* end Desktop Bottom Menu */}
       </div>
+      {/* end left sidebar-menu */}
     </>
   );
 };

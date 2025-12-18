@@ -4,19 +4,16 @@ export const getVerbByGender = (actionType, gender, isAlternative = false) => {
   const variants = ACTION_VARIANTS[actionType];
   if (!variants) return variants[0];
 
-  const offset = isAlternative ? 3 : 0;
+  if (gender === "male") return isAlternative ? variants[3] : variants[0];
+  if (gender === "female") return isAlternative ? variants[4] : variants[1];
+  if (gender === "unknown") return isAlternative ? variants[5] : variants[3];
 
-  if (gender === "male") return variants[0 + offset];
-  if (gender === "female") return variants[1 + offset];
-  if (gender === "unknown") return variants[0 + offset];
-
-  return variants[0 + offset];
+  return isAlternative ? variants[3] : variants[0];
 };
 
 export const getVerbForMultiple = (actionType, isAlternative = false) => {
   const variants = ACTION_VARIANTS[actionType];
-  const offset = isAlternative ? 3 : 0;
-  return variants[2 + offset];
+  return isAlternative ? variants[5] : variants[2];
 };
 
 export const joinNicknames = (nicknames) => {

@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { LeftSidebarMenu } from "@/widgets/left-sidebar-menu/ui/LeftSidebarMenu";
+import { LeftSidebarChat } from "@/widgets/left-sidebar-chat/ui/LeftSidebarChat";
 import { RoomSidebar } from "@/widgets/room-sidebar/ui/RoomSidebar";
 import { ChatMessages } from "@/widgets/chat/messages/ui/ChatMessages";
 import { ChatInput } from "@/widgets/chat/input/ui/ChatInput";
@@ -55,9 +56,12 @@ export const ChatPage = () => {
 
   return (
     <>
+      {/* start layout wrapper */}
       <div className="layout-wrapper d-lg-flex">
         <LeftSidebarMenu onOpenSettings={() => setIsSettingsOpen(true)} />
+        <LeftSidebarChat />
 
+        {/* start user chat */}
         <div className="user-chat w-100 overflow-hidden d-flex flex-column">
           {error && (
             <div className="p-3">
@@ -95,12 +99,13 @@ export const ChatPage = () => {
             />
           </div>
         </div>
-
+        {/* end user chat */}
         <SettingsModal
           isOpen={isSettingsOpen}
           onClose={() => setIsSettingsOpen(false)}
         />
       </div>
+      {/* end layout wrapper */}
     </>
   );
 };
