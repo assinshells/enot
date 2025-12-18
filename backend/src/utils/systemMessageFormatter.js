@@ -13,8 +13,6 @@ export const formatSystemMessage = (type, users, targetRoom = null) => {
 
   const isMultiple = users.length > 1;
   const nicknames = users.map((u) => u.nickname);
-
-  // Определяем, использовать ли альтернативную форму ОДИН РАЗ для всех пользователей
   const isAlternative = Math.random() < 0.1;
 
   if (type === SYSTEM_MESSAGE_TYPES.JOIN) {
@@ -22,7 +20,6 @@ export const formatSystemMessage = (type, users, targetRoom = null) => {
       const verb = getVerbForMultiple("JOIN", isAlternative);
       return MESSAGE_TEMPLATES.JOIN_MULTIPLE(verb, joinNicknames(nicknames));
     }
-    // Используем одну и ту же форму (не смешиваем)
     const verb = getVerbByGender("JOIN", users[0].gender, isAlternative);
     return MESSAGE_TEMPLATES.JOIN_SINGLE(verb, nicknames[0]);
   }

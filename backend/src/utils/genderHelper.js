@@ -8,7 +8,8 @@ export const getVerbByGender = (actionType, gender, isAlternative = false) => {
 
   if (gender === "male") return variants[0 + offset];
   if (gender === "female") return variants[1 + offset];
-  // Для unknown используем мужской род (вошёл/вышел/перешёл)
+  if (gender === "unknown") return variants[0 + offset];
+
   return variants[0 + offset];
 };
 

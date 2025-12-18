@@ -18,10 +18,8 @@ export const ChatInput = ({
   }, [recipientValue]);
 
   useEffect(() => {
-    if (messageValue) {
+    if (messageValue && inputRef.current) {
       const input = inputRef.current;
-      if (!input) return;
-
       const start = input.selectionStart || 0;
       const end = input.selectionEnd || 0;
       const currentText = message;
@@ -33,13 +31,13 @@ export const ChatInput = ({
 
       setMessage(newText);
 
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         const newCursorPos = start + messageValue.length;
         input.setSelectionRange(newCursorPos, newCursorPos);
         input.focus();
-      }, 0);
+      });
     }
-  }, [messageValue]);
+  }, [messageValue, message]);
 
   const handleSubmit = useCallback(
     (e) => {

@@ -23,9 +23,9 @@ const SystemMessageItem = memo(
       onRoomClick
     );
 
-    const handleTimeClick = (e) => {
-      e.preventDefault();
-      onTimeClick(formatTime(message.createdAt));
+    const handleTimeClick = () => {
+      const timeText = formatTime(message.createdAt);
+      onTimeClick(timeText);
     };
 
     return (
@@ -76,13 +76,12 @@ const MessageItem = memo(
       : getColorValue(message.userColor);
     const messageColor = getColorValue(message.userColor);
 
-    const handleTimeClick = (e) => {
-      e.preventDefault();
-      onTimeClick(formatTime(message.createdAt));
+    const handleTimeClick = () => {
+      const timeText = formatTime(message.createdAt);
+      onTimeClick(timeText);
     };
 
-    const handleSenderClick = (e) => {
-      e.preventDefault();
+    const handleSenderClick = () => {
       if (!isMyMessage) {
         onNicknameClick(message.nickname);
       }
@@ -174,6 +173,7 @@ export const ChatMessages = memo(
               <SystemMessageItem
                 key={message._id}
                 message={message}
+                onTimeClick={onTimeClick}
                 onNicknameClick={onNicknameClick}
                 onRoomClick={onRoomClick}
                 currentUserNickname={currentUserNickname}
