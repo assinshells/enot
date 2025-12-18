@@ -1,10 +1,63 @@
 import { useEffect, useRef, memo } from "react";
 import { formatTime } from "@/shared/lib/utils/formatTime";
 import { getColorValue } from "@/shared/config/colors";
+import { SYSTEM_MESSAGE_TYPE } from "@/shared/config/systemMessages";
+import { parseSystemMessage } from "@/features/chat/utils/systemMessageFormatter";
 import "./ChatMessages.css";
 
 const TIME_COLOR = "#6c757d";
 const MY_MESSAGE_COLOR = "#dc3545";
+
+const SystemMessageItem = memo(
+  ({
+    message,
+    onTimeClick,
+    onNicknameClick,
+    onRoomClick,
+    currentUserNickname,
+  }) => {
+    const parts = parseSystemMessage(
+      message,
+      currentUserNickname,
+      onNicknameClick,
+      onRoomClick
+    );
+
+    const handleTimeClick = (e) => {
+      e.preventDefault();
+      onTimeClick(formatTime(message.createdAt));
+    };
+
+    return (
+      <li className="system-message-item text-center my-2">
+        <span
+          className="message-time clickable me-2"
+          onClick={handleTimeClick}
+          style={{ color: TIME_COLOR, cursor: "pointer", fontSize: "0.85em" }}
+        >
+          {formatTime(message.createdAt)}
+        </span>
+        <span className="system-message-content">
+          {parts.map((part, index) => (
+            <span
+              key={index}
+              style={{
+                color: part.color,
+                cursor: part.clickable ? "pointer" : "default",
+                fontWeight: part.clickable ? "500" : "normal",
+              }}
+              onClick={part.onClick}
+            >
+              {part.text}
+            </span>
+          ))}
+        </span>
+      </li>
+    );
+  }
+);
+
+SystemMessageItem.displayName = "SystemMessageItem";
 
 const MessageItem = memo(
   ({
@@ -100,6 +153,7 @@ export const ChatMessages = memo(
     loading,
     onTimeClick,
     onNicknameClick,
+    onRoomClick,
     currentUserId,
     currentUserNickname,
   }) => {
@@ -115,16 +169,26 @@ export const ChatMessages = memo(
     return (
       <div className="chat-messages p-3">
         <ul className="message-list list-unstyled mb-0">
-          {messages.map((message) => (
-            <MessageItem
-              key={message._id}
-              message={message}
-              onTimeClick={onTimeClick}
-              onNicknameClick={onNicknameClick}
-              currentUserId={currentUserId}
-              currentUserNickname={currentUserNickname}
-            />
-          ))}
+          {messages.map((message) =>
+            message.type === SYSTEM_MESSAGE_TYPE ? (
+              <SystemMessageItem
+                key={message._id}
+                message={message}
+                onNicknameClick={onNicknameClick}
+                onRoomClick={onRoomClick}
+                currentUserNickname={currentUserNickname}
+              />
+            ) : (
+              <MessageItem
+                key={message._id}
+                message={message}
+                onTimeClick={onTimeClick}
+                onNicknameClick={onNicknameClick}
+                currentUserId={currentUserId}
+                currentUserNickname={currentUserNickname}
+              />
+            )
+          )}
         </ul>
         <div ref={messagesEndRef} />
       </div>

@@ -46,6 +46,13 @@ export const ChatPage = () => {
     setTimeout(() => setRecipientValue(""), 0);
   }, []);
 
+  const handleRoomClick = useCallback(
+    (roomName) => {
+      changeRoom(roomName);
+    },
+    [changeRoom]
+  );
+
   return (
     <>
       <div className="layout-wrapper d-lg-flex">
@@ -68,6 +75,7 @@ export const ChatPage = () => {
                   loading={loading}
                   onTimeClick={handleTimeClick}
                   onNicknameClick={handleNicknameClick}
+                  onRoomClick={handleRoomClick}
                   currentUserId={user?._id}
                   currentUserNickname={user?.nickname}
                 />

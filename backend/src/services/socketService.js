@@ -1,10 +1,40 @@
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
 import User from "../models/userModel.js";
+import Message from "../models/messageModel.js";
 import roomManager from "./roomManager.js";
 import logger from "../config/logger.js";
+import { SYSTEM_MESSAGE_TYPES } from "../constants/systemMessages.js";
+import { formatSystemMessage } from "../utils/systemMessageFormatter.js";
 
 let io;
+
+const createSystemMessage = async (type, users, room, targetRoom = null) => {
+  const text = formatSystemMessage(type, users, targetRoom);
+  if (!text) return null;
+
+  const systemData = {
+    users: users.map((u) => ({
+      userId: u._id,
+      nickname: u.nickname,
+      color: u.color,
+      gender: u.gender,
+    })),
+  };
+
+  if (targetRoom) {
+    systemData.targetRoom = targetRoom;
+  }
+
+  const message = await Message.create({
+    type: "system",
+    room,
+    text,
+    systemData,
+  });
+
+  return message;
+};
 
 export const initSocket = (server) => {
   io = new Server(server, {
@@ -14,7 +44,6 @@ export const initSocket = (server) => {
     },
   });
 
-  // Middleware: аутентификация
   io.use(async (socket, next) => {
     try {
       const token = socket.handshake.auth.token;
@@ -40,15 +69,66 @@ export const initSocket = (server) => {
 
     socket.on("room:join", async ({ room }) => {
       try {
+        const oldRoom = roomManager.getUserRoom(socket.userId);
+
+        // Если уже в этой комнате - игнорируем
+        if (oldRoom === room) {
+          socket.emit("room:joined", {
+            room,
+            counts: roomManager.getRoomCounts(),
+          });
+          return;
+        }
+
         const counts = roomManager.joinRoom(socket, socket.userId, room);
 
         socket.emit("room:joined", { room, counts });
 
-        socket.to(room).emit("room:user-joined", {
-          userId: socket.userId,
-          nickname: socket.nickname,
-          counts,
-        });
+        const user = await User.findById(socket.userId).select(
+          "nickname color gender"
+        );
+
+        // Если переход из другой комнаты - создаём сообщение о переходе в старой
+        if (oldRoom) {
+          const switchMessage = await createSystemMessage(
+            SYSTEM_MESSAGE_TYPES.SWITCH,
+            [user],
+            oldRoom,
+            room
+          );
+
+          if (switchMessage) {
+            io.to(oldRoom).emit("message:new", {
+              _id: switchMessage._id,
+              type: switchMessage.type,
+              room: switchMessage.room,
+              text: switchMessage.text,
+              systemData: switchMessage.systemData,
+              createdAt: switchMessage.createdAt,
+            });
+          }
+
+          const oldRoomUsers = await getUsersInRoom(oldRoom);
+          io.to(oldRoom).emit("room:users", oldRoomUsers);
+        }
+
+        // Сообщение о входе в новую комнату
+        const joinMessage = await createSystemMessage(
+          SYSTEM_MESSAGE_TYPES.JOIN,
+          [user],
+          room
+        );
+
+        if (joinMessage) {
+          io.to(room).emit("message:new", {
+            _id: joinMessage._id,
+            type: joinMessage.type,
+            room: joinMessage.room,
+            text: joinMessage.text,
+            systemData: joinMessage.systemData,
+            createdAt: joinMessage.createdAt,
+          });
+        }
 
         io.emit("room:counts", counts);
 
@@ -65,11 +145,8 @@ export const initSocket = (server) => {
 
       const counts = roomManager.leaveRoom(socket, socket.userId);
 
-      io.to(room).emit("room:user-left", {
-        userId: socket.userId,
-        nickname: socket.nickname,
-        counts,
-      });
+      // НЕ создаём системное сообщение при явном room:leave
+      // Оно будет создано при переходе в другую комнату или disconnect
 
       io.emit("room:counts", counts);
 
@@ -85,14 +162,27 @@ export const initSocket = (server) => {
       const room = roomManager.getUserRoom(socket.userId);
 
       if (room) {
+        const user = await User.findById(socket.userId).select(
+          "nickname color gender"
+        );
+        const systemMessage = await createSystemMessage(
+          SYSTEM_MESSAGE_TYPES.LEAVE,
+          [user],
+          room
+        );
+
+        if (systemMessage) {
+          io.to(room).emit("message:new", {
+            _id: systemMessage._id,
+            type: systemMessage.type,
+            room: systemMessage.room,
+            text: systemMessage.text,
+            systemData: systemMessage.systemData,
+            createdAt: systemMessage.createdAt,
+          });
+        }
+
         const counts = roomManager.leaveRoom(socket, socket.userId);
-
-        io.to(room).emit("room:user-left", {
-          userId: socket.userId,
-          nickname: socket.nickname,
-          counts,
-        });
-
         io.emit("room:counts", counts);
 
         const users = await getUsersInRoom(room);
@@ -111,7 +201,6 @@ export const initSocket = (server) => {
   return io;
 };
 
-// Вспомогательная функция для получения пользователей в комнате
 async function getUsersInRoom(roomName) {
   const sockets = await io.in(roomName).fetchSockets();
   const userIds = sockets.map((s) => s.userId);

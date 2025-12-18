@@ -2,15 +2,24 @@ import mongoose from "mongoose";
 
 const messageSchema = new mongoose.Schema(
   {
+    type: {
+      type: String,
+      enum: ["user", "system"],
+      default: "user",
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      required: function () {
+        return this.type === "user";
+      },
       index: true,
     },
     nickname: {
       type: String,
-      required: true,
+      required: function () {
+        return this.type === "user";
+      },
     },
     userColor: {
       type: String,
@@ -25,15 +34,25 @@ const messageSchema = new mongoose.Schema(
     },
     text: {
       type: String,
-      required: [true, "Текст сообщения обязателен"],
+      required: true,
       trim: true,
       maxlength: [1000, "Сообщение не должно превышать 1000 символов"],
     },
-    // Новое поле для приватных сообщений
     recipient: {
       type: String,
       default: null,
       trim: true,
+    },
+    systemData: {
+      users: [
+        {
+          userId: mongoose.Schema.Types.ObjectId,
+          nickname: String,
+          color: String,
+          gender: String,
+        },
+      ],
+      targetRoom: String,
     },
     createdAt: {
       type: Date,
@@ -50,6 +69,7 @@ const messageSchema = new mongoose.Schema(
 messageSchema.index({ room: 1, createdAt: -1 });
 messageSchema.index({ user: 1, room: 1 });
 messageSchema.index({ recipient: 1 });
+messageSchema.index({ type: 1 });
 
 const Message = mongoose.model("Message", messageSchema);
 
