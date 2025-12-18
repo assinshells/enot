@@ -80,6 +80,17 @@ export const LeftSidebarMenu = ({ onOpenSettings }) => {
                 <i className="bi bi-people"></i>
               </a>
             </li>
+            <li className="nav-item" title="Settings">
+              <a
+                className="nav-link"
+                id="pills-settings-tab"
+                data-bs-toggle="pill"
+                href="#pills-settings"
+                role="tab"
+              >
+                <i className="bi bi-gear"></i>
+              </a>
+            </li>
 
             {/* start Mobile Dropdown */}
             <li className="nav-item dropdown profile-user-dropdown d-inline-block d-lg-none">

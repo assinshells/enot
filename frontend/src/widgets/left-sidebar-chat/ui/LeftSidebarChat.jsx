@@ -36,6 +36,17 @@ export const LeftSidebarChat = () => {
             Users
           </div>
           {/* end users tab-pane */}
+
+          {/* start settings tab-pane */}
+          <div
+            className="tab-pane"
+            id="pills-settings"
+            role="tabpanel"
+            aria-labelledby="pills-settings-tab"
+          >
+            settings
+          </div>
+          {/* end settings tab-pane */}
         </div>
       </div>
       {/* end chat-leftsidebar */}
