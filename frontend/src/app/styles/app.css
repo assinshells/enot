@@ -11,6 +11,7 @@
 :root {
   --background-color: #ffffff;
   --default-color: #444444;
+  /*--bs-link-hover-decoration: underline;*/
 }
 
 /*--------------------------------------------------------------

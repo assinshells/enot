@@ -1,10 +1,9 @@
 import { useState, useCallback } from "react";
 import { LeftSidebarMenu } from "@/widgets/left-sidebar-menu/ui/LeftSidebarMenu";
 import { LeftSidebarChat } from "@/widgets/left-sidebar-chat/ui/LeftSidebarChat";
-import { RoomSidebar } from "@/widgets/room-sidebar/ui/RoomSidebar";
+import { ChatHead } from "@/widgets/chat/head/ui/ChatHead";
 import { ChatMessages } from "@/widgets/chat/messages/ui/ChatMessages";
 import { ChatInput } from "@/widgets/chat/input/ui/ChatInput";
-import { SettingsModal } from "@/widgets/modals/settings/ui/SettingsModal";
 import { useChat } from "@/features/chat/model/useChat";
 import { useAuth } from "@/shared/lib/hooks/useAuth";
 import { Alert } from "@/shared/ui";
@@ -22,7 +21,6 @@ export const ChatPage = () => {
     changeRoom,
   } = useChat();
 
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [recipientValue, setRecipientValue] = useState("");
   const [messageValue, setMessageValue] = useState("");
 
@@ -58,52 +56,50 @@ export const ChatPage = () => {
     <>
       {/* start layout wrapper */}
       <div className="layout-wrapper d-lg-flex">
-        <LeftSidebarMenu onOpenSettings={() => setIsSettingsOpen(true)} />
-        <LeftSidebarChat />
+        <LeftSidebarMenu />
+        <LeftSidebarChat
+          currentRoom={currentRoom}
+          onRoomChange={changeRoom}
+          onUserClick={handleNicknameClick}
+        />
 
         {/* start user chat */}
-        <div className="user-chat w-100 overflow-hidden d-flex flex-column">
-          {error && (
-            <div className="p-3">
-              <Alert type="danger" onClose={() => {}}>
-                {error}
-              </Alert>
-            </div>
-          )}
-
-          <div className="d-flex flex-grow-1 overflow-hidden">
-            <div className="flex-grow-1 d-flex flex-column overflow-hidden">
-              <div className="flex-grow-1 overflow-auto">
-                <ChatMessages
-                  messages={messages}
-                  loading={loading}
-                  onTimeClick={handleTimeClick}
-                  onNicknameClick={handleNicknameClick}
-                  onRoomClick={handleRoomClick}
-                  currentUserId={user?._id}
-                  currentUserNickname={user?.nickname}
-                />
+        <div className="user-chat w-100 overflow-hidden">
+          <div className="d-lg-flex">
+            <div className="w-100 overflow-hidden position-relative">
+              {error && (
+                <div className="p-3">
+                  <Alert type="danger" onClose={() => {}}>
+                    {error}
+                  </Alert>
+                </div>
+              )}
+              <ChatHead />
+              <div className="d-flex flex-grow-1 overflow-hidden">
+                <div className="flex-grow-1 d-flex flex-column overflow-hidden">
+                  <div className="flex-grow-1 overflow-auto">
+                    <ChatMessages
+                      messages={messages}
+                      loading={loading}
+                      onTimeClick={handleTimeClick}
+                      onNicknameClick={handleNicknameClick}
+                      onRoomClick={handleRoomClick}
+                      currentUserId={user?._id}
+                      currentUserNickname={user?.nickname}
+                    />
+                  </div>
+                  <ChatInput
+                    onSendMessage={handleSendMessage}
+                    loading={sending}
+                    recipientValue={recipientValue}
+                    messageValue={messageValue}
+                  />
+                </div>
               </div>
-              <ChatInput
-                onSendMessage={handleSendMessage}
-                loading={sending}
-                recipientValue={recipientValue}
-                messageValue={messageValue}
-              />
             </div>
-
-            <RoomSidebar
-              currentRoom={currentRoom}
-              onRoomChange={changeRoom}
-              onUserClick={handleNicknameClick}
-            />
           </div>
         </div>
         {/* end user chat */}
-        <SettingsModal
-          isOpen={isSettingsOpen}
-          onClose={() => setIsSettingsOpen(false)}
-        />
       </div>
       {/* end layout wrapper */}
     </>

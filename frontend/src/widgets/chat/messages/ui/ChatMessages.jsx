@@ -29,7 +29,7 @@ const SystemMessageItem = memo(
     };
 
     return (
-      <li className="system-message-item text-center my-2">
+      <li>
         <span
           className="message-time clickable me-2"
           onClick={handleTimeClick}
@@ -166,32 +166,36 @@ export const ChatMessages = memo(
     if (!messages || messages.length === 0) return <EmptyState />;
 
     return (
-      <div className="chat-messages p-3">
-        <ul className="message-list list-unstyled mb-0">
-          {messages.map((message) =>
-            message.type === SYSTEM_MESSAGE_TYPE ? (
-              <SystemMessageItem
-                key={message._id}
-                message={message}
-                onTimeClick={onTimeClick}
-                onNicknameClick={onNicknameClick}
-                onRoomClick={onRoomClick}
-                currentUserNickname={currentUserNickname}
-              />
-            ) : (
-              <MessageItem
-                key={message._id}
-                message={message}
-                onTimeClick={onTimeClick}
-                onNicknameClick={onNicknameClick}
-                currentUserId={currentUserId}
-                currentUserNickname={currentUserNickname}
-              />
-            )
-          )}
-        </ul>
-        <div ref={messagesEndRef} />
-      </div>
+      <>
+        {/* start chat conversation section */}
+        <div class="chat-conversation p-3 p-lg-4">
+          <ul className="list-unstyled mb-0">
+            {messages.map((message) =>
+              message.type === SYSTEM_MESSAGE_TYPE ? (
+                <SystemMessageItem
+                  key={message._id}
+                  message={message}
+                  onTimeClick={onTimeClick}
+                  onNicknameClick={onNicknameClick}
+                  onRoomClick={onRoomClick}
+                  currentUserNickname={currentUserNickname}
+                />
+              ) : (
+                <MessageItem
+                  key={message._id}
+                  message={message}
+                  onTimeClick={onTimeClick}
+                  onNicknameClick={onNicknameClick}
+                  currentUserId={currentUserId}
+                  currentUserNickname={currentUserNickname}
+                />
+              )
+            )}
+          </ul>
+          <div ref={messagesEndRef} />
+        </div>
+        {/* end chat conversation section */}
+      </>
     );
   }
 );

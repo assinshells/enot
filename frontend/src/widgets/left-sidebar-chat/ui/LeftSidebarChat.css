@@ -1,0 +1,72 @@
+:root {
+  --bs-sidebar-sub-bg: #f5f7fb;
+  --bs-light: #e6ebf5;
+  --bs-secondary-color: #7a7f9a;
+  --bs-border-radius-pill: 50rem;
+}
+.chat-leftsidebar {
+  height: 100vh;
+  background-color: var(--bs-sidebar-sub-bg);
+}
+@media (min-width: 992px) {
+  .chat-leftsidebar {
+    min-width: 380px;
+    max-width: 380px;
+  }
+}
+.chat-leftsidebar .user-status-box {
+  background-color: var(--bs-light);
+  padding: 8px;
+  border-radius: 8px;
+  text-align: center;
+  margin-top: 16px;
+  display: block;
+}
+
+.chat-message-list {
+  height: calc(100vh - 280px);
+}
+@media (max-width: 991.98px) {
+  .chat-message-list {
+    height: calc(100vh - 320px);
+  }
+}
+.chat-group-list {
+  height: calc(100vh - 160px);
+}
+@media (max-width: 991.98px) {
+  .chat-group-list {
+    height: calc(100vh - 194px);
+  }
+}
+.chat-list {
+  margin: 0;
+}
+.chat-list li.active a {
+  background-color: var(--bs-light);
+}
+.chat-list li a {
+  position: relative;
+  display: block;
+  padding: 15px 20px;
+  color: var(--bs-secondary-color);
+  -webkit-transition: all 0.4s;
+  transition: all 0.4s;
+  border-top: 1px solid var(--bs-sidebar-sub-bg);
+  border-radius: 4px;
+}
+.chat-list li a:hover {
+  background-color: var(--bs-light);
+}
+
+.badge-soft-danger {
+  color: #ef476f;
+  background-color: rgba(239, 71, 111, 0.18);
+}
+.rounded-pill {
+  border-radius: var(--bs-border-radius-pill) !important;
+}
+
+.font-size-14 {
+  font-size: 14px !important;
+}

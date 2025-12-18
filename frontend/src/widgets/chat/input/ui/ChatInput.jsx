@@ -76,48 +76,50 @@ export const ChatInput = ({
     : "Введите сообщение...";
 
   return (
-    <div className="chat-input-section p-3 border-top mb-0">
+    <div className="chat-input-section p-3 p-lg-4 border-top mb-0">
       <form onSubmit={handleSubmit}>
-        <div className="row g-0 align-items-center">
+        <div className="row g-0">
           <div className="col">
-            <div className="position-relative">
-              <input
-                ref={inputRef}
-                type="text"
-                className="form-control form-control-lg bg-light border-light"
-                placeholder={inputPlaceholder}
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyDown={handleKeyDown}
+            <input
+              ref={inputRef}
+              type="text"
+              className="form-control form-control-lg bg-light border-light"
+              placeholder={inputPlaceholder}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={handleKeyDown}
+              disabled={loading}
+              maxLength={MAX_MESSAGE_LENGTH}
+            />
+            {recipientPlaceholder && (
+              <button
+                type="button"
+                className="btn btn-sm btn-link position-absolute top-50 end-0 translate-middle-y text-danger"
+                onClick={handleClearRecipient}
                 disabled={loading}
-                maxLength={MAX_MESSAGE_LENGTH}
-              />
-              {recipientPlaceholder && (
-                <button
-                  type="button"
-                  className="btn btn-sm btn-link position-absolute top-50 end-0 translate-middle-y text-danger"
-                  onClick={handleClearRecipient}
-                  disabled={loading}
-                  title="Очистить получателя"
-                >
-                  <i className="bi bi-x-circle-fill"></i>
-                </button>
-              )}
-            </div>
+                title="Очистить получателя"
+              >
+                <i className="bi bi-x-circle-fill"></i>
+              </button>
+            )}
           </div>
           <div className="col-auto">
-            <div className="chat-input-links ms-2">
-              <button
-                type="submit"
-                className="btn btn-primary btn-lg"
-                disabled={!message.trim() || loading}
-              >
-                {loading ? (
-                  <span className="spinner-border spinner-border-sm" />
-                ) : (
-                  <i className="bi bi-send-fill"></i>
-                )}
-              </button>
+            <div className="chat-input-links ms-md-2 me-md-0">
+              <ul class="list-inline mb-0">
+                <li class="list-inline-item">
+                  <button
+                    type="submit"
+                    className="btn btn-primary font-size-16 btn-lg chat-send"
+                    disabled={!message.trim() || loading}
+                  >
+                    {loading ? (
+                      <span className="spinner-border spinner-border-sm" />
+                    ) : (
+                      <i className="bi bi-send-fill"></i>
+                    )}
+                  </button>
+                </li>
+              </ul>
             </div>
           </div>
         </div>

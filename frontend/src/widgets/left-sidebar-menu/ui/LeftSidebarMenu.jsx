@@ -60,7 +60,7 @@ export const LeftSidebarMenu = ({ onOpenSettings }) => {
             </li>
             <li className="nav-item" title="Chat">
               <a
-                className="nav-link"
+                className="nav-link active"
                 id="pills-rooms-tab"
                 data-bs-toggle="pill"
                 href="#pills-rooms"
