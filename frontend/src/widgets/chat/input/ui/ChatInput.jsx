@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { MAX_MESSAGE_LENGTH } from "@/shared/config/constants";
 
 export const ChatInput = ({
@@ -22,13 +22,9 @@ export const ChatInput = ({
       const input = inputRef.current;
       const start = input.selectionStart || 0;
       const end = input.selectionEnd || 0;
-      const currentText = message;
 
       const newText =
-        currentText.substring(0, start) +
-        messageValue +
-        currentText.substring(end);
-
+        message.substring(0, start) + messageValue + message.substring(end);
       setMessage(newText);
 
       requestAnimationFrame(() => {
@@ -71,9 +67,15 @@ export const ChatInput = ({
     setRecipientPlaceholder("");
   }, []);
 
-  const inputPlaceholder = recipientPlaceholder
-    ? `Сообщение для ${recipientPlaceholder}...`
-    : "Введите сообщение...";
+  const inputPlaceholder = useMemo(
+    () =>
+      recipientPlaceholder
+        ? `Сообщение для ${recipientPlaceholder}...`
+        : "Введите сообщение...",
+    [recipientPlaceholder]
+  );
+
+  const isSubmitDisabled = !message.trim() || loading;
 
   return (
     <div className="chat-input-section p-3 p-lg-4 border-top mb-0">
@@ -105,12 +107,12 @@ export const ChatInput = ({
           </div>
           <div className="col-auto">
             <div className="chat-input-links ms-md-2 me-md-0">
-              <ul class="list-inline mb-0">
-                <li class="list-inline-item">
+              <ul className="list-inline mb-0">
+                <li className="list-inline-item">
                   <button
                     type="submit"
                     className="btn btn-primary font-size-16 btn-lg chat-send"
-                    disabled={!message.trim() || loading}
+                    disabled={isSubmitDisabled}
                   >
                     {loading ? (
                       <span className="spinner-border spinner-border-sm" />

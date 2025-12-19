@@ -2,18 +2,22 @@ import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/shared/lib/hooks/useAuth";
 import { useFormError } from "@/shared/lib/hooks/useFormError";
-import { useSessionStorage } from "@/shared/lib/hooks/useSessionStorage";
-import { ROOM_NAMES, DEFAULT_ROOM } from "@/shared/config/rooms";
+import { useRoomSelection } from "@/shared/lib/hooks/useRoomSelection";
 import { Input, Button, Alert, Card } from "@/shared/ui";
 
 export const LoginForm = () => {
   const navigate = useNavigate();
   const { loginUser } = useAuth();
   const { error, setError, clearError } = useFormError();
-  const [, setCurrentRoom] = useSessionStorage("currentRoom", "");
+  const {
+    selectedRoom,
+    setSelectedRoom,
+    availableRooms,
+    validateRoom,
+    saveRoom,
+  } = useRoomSelection();
 
   const [formData, setFormData] = useState({ nickname: "", password: "" });
-  const [selectedRoom, setSelectedRoom] = useState(DEFAULT_ROOM);
   const [loading, setLoading] = useState(false);
 
   const handleChange = useCallback((e) => {
@@ -26,15 +30,16 @@ export const LoginForm = () => {
       e.preventDefault();
       clearError();
 
-      if (!selectedRoom) {
-        setError("Выберите комнату");
+      const roomError = validateRoom();
+      if (roomError) {
+        setError(roomError);
         return;
       }
 
       setLoading(true);
 
       try {
-        setCurrentRoom(selectedRoom);
+        saveRoom();
         await loginUser(formData);
         navigate("/");
       } catch (err) {
@@ -60,7 +65,8 @@ export const LoginForm = () => {
       navigate,
       setError,
       clearError,
-      setCurrentRoom,
+      validateRoom,
+      saveRoom,
     ]
   );
 
@@ -101,7 +107,7 @@ export const LoginForm = () => {
                 <option value="" disabled>
                   Выберите комнату...
                 </option>
-                {ROOM_NAMES.map((room) => (
+                {availableRooms.map((room) => (
                   <option key={room} value={room}>
                     {room}
                   </option>
@@ -109,12 +115,7 @@ export const LoginForm = () => {
               </select>
             </div>
             <div className="d-grid">
-              <Button
-                type="submit"
-                className="auth-button"
-                loading={loading}
-                fullWidth
-              >
+              <Button type="submit" loading={loading} fullWidth>
                 Войти
               </Button>
             </div>

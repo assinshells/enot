@@ -1,20 +1,23 @@
-/**
- * Shared Hook: Form Error Management
- * Путь: src/shared/lib/hooks/useFormError.js
- */
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 
 export const useFormError = () => {
-  const [error, setError] = useState("");
+  const [error, setErrorState] = useState("");
 
   const clearError = useCallback(() => {
-    setError("");
+    setErrorState("");
   }, []);
 
-  const setFormError = useCallback((err) => {
+  const setError = useCallback((err) => {
     const message = err?.message || err || "Произошла ошибка";
-    setError(message);
+    setErrorState(message);
   }, []);
 
-  return { error, setError: setFormError, clearError };
+  return useMemo(
+    () => ({
+      error,
+      setError,
+      clearError,
+    }),
+    [error, setError, clearError]
+  );
 };

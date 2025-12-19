@@ -48,7 +48,7 @@ export const EmailConfirmationForm = () => {
           captchaToken,
         };
 
-        if (email && email.trim()) {
+        if (email?.trim()) {
           registrationData.email = email.trim();
         }
 

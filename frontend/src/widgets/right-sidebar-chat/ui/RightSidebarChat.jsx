@@ -6,7 +6,7 @@ import { useRooms, useRoomUsers } from "@/shared/lib/hooks";
 import { GENDER_OPTIONS } from "@/shared/config/constants";
 import "./RightSidebarChat.css";
 
-const RoomItem = memo(({ room, count, isActive, onClick }) => (
+const RoomItem = memo(({ room, count, onClick }) => (
   <li onClick={onClick}>
     <a href="#">
       <div className="d-flex align-items-center">
@@ -26,26 +26,34 @@ const RoomItem = memo(({ room, count, isActive, onClick }) => (
 RoomItem.displayName = "RoomItem";
 
 const UserItem = memo(({ user, isCurrentUser, userColor, onClick }) => (
-  <li onClick={onClick}>
+  <li
+    onClick={onClick}
+    style={{ cursor: isCurrentUser ? "default" : "pointer" }}
+  >
     <div
-      style={{
-        width: "8px",
-        height: "8px",
-        backgroundColor: userColor,
-      }}
+      style={{ width: "8px", height: "8px", backgroundColor: userColor }}
     ></div>
-    <span
-      style={{
-        color: isCurrentUser ? "#6c757d" : userColor,
-      }}
-    >
+    <span style={{ color: isCurrentUser ? "#6c757d" : userColor }}>
       {user.nickname}
-      {isCurrentUser && <small>(вы)</small>}
+      {isCurrentUser && <small> (вы)</small>}
     </span>
   </li>
 ));
 
 UserItem.displayName = "UserItem";
+
+const GenderFilterButton = memo(({ gender, count, isActive, onClick }) => {
+  const option = GENDER_OPTIONS.find((o) => o.value === gender);
+  return (
+    <button onClick={onClick} className={isActive ? "active" : ""}>
+      <i className={option?.icon}></i>
+      {gender === "male" ? "М" : gender === "female" ? "Ж" : "?"}
+      <span>{count}</span>
+    </button>
+  );
+});
+
+GenderFilterButton.displayName = "GenderFilterButton";
 
 export const RightSidebarChat = memo(({ onUserClick }) => {
   const { user } = useAuth();
@@ -54,14 +62,13 @@ export const RightSidebarChat = memo(({ onUserClick }) => {
   const { activeFilter, setActiveFilter, genderCounts, filteredUsers } =
     useGenderFilter(users, user?.gender);
 
-  const totalUsers = useMemo(() => {
-    return Object.values(counts).reduce((sum, count) => sum + count, 0);
-  }, [counts]);
+  const totalUsers = useMemo(
+    () => Object.values(counts).reduce((sum, count) => sum + count, 0),
+    [counts]
+  );
 
   const handleRoomClick = useCallback(
-    (roomName) => {
-      changeRoom(roomName);
-    },
+    (roomName) => changeRoom(roomName),
     [changeRoom]
   );
 
@@ -70,6 +77,25 @@ export const RightSidebarChat = memo(({ onUserClick }) => {
       onUserClick?.(nickname);
     },
     [onUserClick]
+  );
+
+  const usersList = useMemo(
+    () =>
+      filteredUsers.map((listUser) => {
+        const userColor = getColorValue(listUser.color);
+        const isCurrentUser = user?._id === listUser._id;
+
+        return (
+          <UserItem
+            key={listUser._id}
+            user={listUser}
+            isCurrentUser={isCurrentUser}
+            userColor={userColor}
+            onClick={() => !isCurrentUser && handleUserClick(listUser.nickname)}
+          />
+        );
+      }),
+    [filteredUsers, user?._id, handleUserClick]
   );
 
   return (
@@ -98,43 +124,29 @@ export const RightSidebarChat = memo(({ onUserClick }) => {
             <h6>
               <i className="bi bi-people-fill"></i>В чате: {totalUsers}
             </h6>
-            <button onClick={() => setActiveFilter("all")}>Все</button>
+            <button
+              onClick={() => setActiveFilter("all")}
+              className={activeFilter === "all" ? "active" : ""}
+            >
+              Все
+            </button>
           </div>
 
           <div>
             {["male", "female", "unknown"].map((gender) => (
-              <button key={gender} onClick={() => setActiveFilter(gender)}>
-                <i
-                  className={`${
-                    GENDER_OPTIONS.find((o) => o.value === gender)?.icon
-                  }`}
-                ></i>
-                {gender === "male" ? "М" : gender === "female" ? "Ж" : "?"}
-                <span>{genderCounts[gender]}</span>
-              </button>
+              <GenderFilterButton
+                key={gender}
+                gender={gender}
+                count={genderCounts[gender]}
+                isActive={activeFilter === gender}
+                onClick={() => setActiveFilter(gender)}
+              />
             ))}
           </div>
 
           <div className="users-list">
             {filteredUsers.length > 0 ? (
-              <ul>
-                {filteredUsers.map((listUser) => {
-                  const userColor = getColorValue(listUser.color);
-                  const isCurrentUser = user?._id === listUser._id;
-
-                  return (
-                    <UserItem
-                      key={listUser._id}
-                      user={listUser}
-                      isCurrentUser={isCurrentUser}
-                      userColor={userColor}
-                      onClick={() =>
-                        !isCurrentUser && handleUserClick(listUser.nickname)
-                      }
-                    />
-                  );
-                })}
-              </ul>
+              <ul>{usersList}</ul>
             ) : (
               <div>
                 <i className="bi bi-person-slash"></i>

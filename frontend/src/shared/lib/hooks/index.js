@@ -10,3 +10,4 @@ export { useSocketRoom } from "./useSocketRoom";
 export { useSessionStorage } from "./useSessionStorage";
 export { useRooms } from "./useRooms";
 export { useRoomUsers } from "./useRoomUsers";
+export { useRoomSelection } from "./useRoomSelection";

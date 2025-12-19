@@ -2,9 +2,6 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { chatApi } from "@/entities/chat/api/chatApi";
 import { useSocketEvent } from "@/shared/lib/hooks";
 
-/**
- * Хук для управления сообщениями чата
- */
 export const useChat = (currentRoom) => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,6 +12,8 @@ export const useChat = (currentRoom) => {
   const messageIdsRef = useRef(new Set());
 
   const loadMessages = useCallback(async (room) => {
+    if (!room) return;
+
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -111,6 +110,12 @@ export const useChat = (currentRoom) => {
       setLoading(false);
     }, [])
   );
+
+  useEffect(() => {
+    if (currentRoom) {
+      loadMessages(currentRoom);
+    }
+  }, [currentRoom, loadMessages]);
 
   useEffect(() => {
     return () => {

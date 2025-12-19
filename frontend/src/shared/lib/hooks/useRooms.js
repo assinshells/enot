@@ -1,7 +1,3 @@
-/**
- * Shared Hook: Rooms Management
- * Путь: src/shared/lib/hooks/useRooms.js
- */
 import { useState, useEffect, useCallback } from "react";
 import { useSocketEvent, useSocketEmit } from "./useSocket";
 
@@ -21,7 +17,12 @@ export const useRooms = () => {
     }, [])
   );
 
-  useSocketEvent("room:counts", setCounts);
+  useSocketEvent(
+    "room:counts",
+    useCallback((newCounts) => {
+      setCounts(newCounts);
+    }, [])
+  );
 
   useSocketEvent(
     "room:joined",
@@ -31,6 +32,10 @@ export const useRooms = () => {
   );
 
   useEffect(() => {
+    const savedRoom = sessionStorage.getItem("currentRoom");
+    if (savedRoom) {
+      emit("room:join", { room: savedRoom });
+    }
     emit("room:list");
   }, [emit]);
 
@@ -41,7 +46,8 @@ export const useRooms = () => {
       emit("room:leave");
       setTimeout(() => {
         emit("room:join", { room: roomName });
-      }, 50);
+        sessionStorage.setItem("currentRoom", roomName);
+      }, 100);
     },
     [currentRoom, emit]
   );

@@ -6,6 +6,7 @@ body {
   color: var(--body-text-color);
   font-family: var(--body-font-family);
 }
+
 a {
   text-decoration: none;
 }
@@ -24,13 +25,15 @@ a {
   border: 1px solid var(--input-border);
 }
 
-.auth-input {
+.auth-input,
+.auth-select {
   background-color: var(--input-bg);
   color: var(--input-text);
   border: 1px solid var(--input-border);
 }
 
-.auth-input:focus {
+.auth-input:focus,
+.auth-select:focus {
   border-color: var(--input-focus);
   box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.25);
 }
@@ -40,26 +43,15 @@ a {
   font-size: 0.8rem;
 }
 
-.auth-select {
-  background-color: var(--input-bg);
-  color: var(--input-text);
-  border: 1px solid var(--input-border);
-}
-
-.auth-select:focus {
-  border-color: var(--input-focus);
-  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.25);
-}
-
 .no-caret::after {
   display: none !important;
 }
+
 .form-select {
   appearance: none;
-  -webkit-appearance: none; /* Chrome, Safari */
-  -moz-appearance: none; /* Firefox */
   background-image: none;
 }
+
 .dropdown-item:active,
 .dropdown-item:hover,
 .dropdown-item:focus,
@@ -68,10 +60,3 @@ a {
   color: inherit !important;
   outline: none !important;
 }
-/*.btn-primary {
-  --bs-btn-bg: #ff5722;
-  --bs-btn-border-color: #ff5722;
-  --bs-btn-hover-bg: #e64a19;
-  --bs-btn-hover-border-color: #e64a19;
-  --bs-btn-active-bg: #d84315;
-}*/

@@ -1,4 +1,4 @@
-import { useEffect, useRef, memo } from "react";
+import { useEffect, useRef, memo, useMemo } from "react";
 import { formatTime } from "@/shared/lib/utils/formatTime";
 import { getColorValue } from "@/shared/config/colors";
 import { SYSTEM_MESSAGE_TYPE } from "@/shared/config/systemMessages";
@@ -16,21 +16,30 @@ const SystemMessageItem = memo(
     onRoomClick,
     currentUserNickname,
   }) => {
-    const parts = parseSystemMessage(
-      message,
-      currentUserNickname,
-      onNicknameClick,
-      onRoomClick
+    const parts = useMemo(
+      () =>
+        parseSystemMessage(
+          message,
+          currentUserNickname,
+          onNicknameClick,
+          onRoomClick
+        ),
+      [message, currentUserNickname, onNicknameClick, onRoomClick]
+    );
+
+    const time = useMemo(
+      () => formatTime(message.createdAt),
+      [message.createdAt]
     );
 
     return (
       <li>
         <span
           className="message-time clickable me-2"
-          onClick={() => onTimeClick(formatTime(message.createdAt))}
+          onClick={() => onTimeClick(time)}
           style={{ color: TIME_COLOR, cursor: "pointer", fontSize: "0.85em" }}
         >
-          {formatTime(message.createdAt)}
+          {time}
         </span>
         <span className="system-message-content">
           {parts.map((part, index) => (
@@ -70,15 +79,19 @@ const MessageItem = memo(
       ? MY_MESSAGE_COLOR
       : getColorValue(message.userColor);
     const messageColor = getColorValue(message.userColor);
+    const time = useMemo(
+      () => formatTime(message.createdAt),
+      [message.createdAt]
+    );
 
     return (
       <li className="message-item">
         <span
           className="message-time clickable"
-          onClick={() => onTimeClick(formatTime(message.createdAt))}
+          onClick={() => onTimeClick(time)}
           style={{ color: TIME_COLOR, cursor: "pointer" }}
         >
-          {formatTime(message.createdAt)}
+          {time}
         </span>{" "}
         <span
           className={`message-sender ${!isMyMessage ? "clickable" : ""}`}
@@ -144,10 +157,10 @@ export const ChatMessages = memo(
 
     useEffect(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages]);
+    }, [messages.length]);
 
     if (loading) return <LoadingSpinner />;
-    if (!messages || messages.length === 0) return <EmptyState />;
+    if (!messages?.length) return <EmptyState />;
 
     return (
       <div className="chat-conversation p-3 p-lg-4">
