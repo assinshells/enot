@@ -4,10 +4,8 @@
  */
 export const Card = ({ children }) => {
   return (
-    <div className="card">
-      <div className="p-4 card-body">
-        <div className="p-4 card-body">{children}</div>
-      </div>
+    <div className="card auth-card p-4 shadow-sm mb-2">
+      <div className="card-body">{children}</div>
     </div>
   );
 };

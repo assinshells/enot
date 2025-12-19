@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { ROOM_NAMES, COLOR_VALUES } from "../shared/constants.js";
 
 const messageSchema = new mongoose.Schema(
   {
@@ -23,13 +24,13 @@ const messageSchema = new mongoose.Schema(
     },
     userColor: {
       type: String,
-      enum: ["black", "blue", "green", "orange"],
-      default: "black",
+      enum: Object.values(COLOR_VALUES),
+      default: COLOR_VALUES.BLACK,
     },
     room: {
       type: String,
       required: true,
-      enum: ["Главная", "Знакомства", "Беспредел"],
+      enum: ROOM_NAMES,
       index: true,
     },
     text: {

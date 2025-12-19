@@ -53,10 +53,7 @@ export const EmailConfirmationForm = () => {
         }
 
         await registerUser(registrationData);
-
-        // Сохраняем выбранную комнату ПЕРЕД переходом
         sessionStorage.setItem("currentRoom", room);
-
         navigate("/");
       } catch (err) {
         setError(err);
@@ -86,45 +83,39 @@ export const EmailConfirmationForm = () => {
         {error && <Alert type="danger">{error}</Alert>}
 
         <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <div className="mb-3 bg-soft-light rounded-3">
-              <input
-                type="text"
-                className="form-control"
-                value={nickname}
-                disabled
-              />
-            </div>
-          </div>
-          <div className="mb-3">
-            <div className="mb-3 bg-soft-light rounded-3">
-              <Input
-                type="email"
-                placeholder="Email (опционально)"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                helperText="Нужен для восстановления пароля"
-              />
-            </div>
-          </div>
-          <div className="mb-3">
-            <div className="mb-3 bg-soft-light rounded-3">
-              <ColorPicker
-                value={selectedColor}
-                onChange={setSelectedColor}
-                disabled={loading}
-              />
-            </div>
+          <div className="mb-3 bg-soft-light rounded-3">
+            <input
+              type="text"
+              className="form-control"
+              value={nickname}
+              disabled
+            />
           </div>
 
-          <div className="mb-3">
-            <div className="mb-3 bg-soft-light rounded-3">
-              <GenderPicker
-                value={selectedGender}
-                onChange={setSelectedGender}
-                disabled={loading}
-              />
-            </div>
+          <div className="mb-3 bg-soft-light rounded-3">
+            <Input
+              type="email"
+              placeholder="Email (опционально)"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              helperText="Нужен для восстановления пароля"
+            />
+          </div>
+
+          <div className="mb-3 bg-soft-light rounded-3">
+            <ColorPicker
+              value={selectedColor}
+              onChange={setSelectedColor}
+              disabled={loading}
+            />
+          </div>
+
+          <div className="mb-3 bg-soft-light rounded-3">
+            <GenderPicker
+              value={selectedGender}
+              onChange={setSelectedGender}
+              disabled={loading}
+            />
           </div>
 
           {process.env.NODE_ENV === "production" && (
@@ -135,6 +126,7 @@ export const EmailConfirmationForm = () => {
               </div>
             </div>
           )}
+
           <div className="d-grid">
             <Button type="submit" loading={loading} fullWidth>
               Подтвердить и войти
@@ -142,6 +134,7 @@ export const EmailConfirmationForm = () => {
           </div>
         </form>
       </Card>
+
       <div className="mt-5 text-center">
         <button
           className="btn btn-link"

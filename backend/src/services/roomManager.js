@@ -1,28 +1,22 @@
-// backend/src/services/roomManager.js
-import { ROOM_NAMES } from "../../../frontend/src/shared/config/rooms.js";
+import { ROOM_NAMES, isValidRoom } from "../shared/constants.js";
 
 class RoomManager {
   constructor() {
     this.rooms = new Map();
     this.userRooms = new Map();
-    this.validRooms = ROOM_NAMES; // ✅ Из конфига
+    this.validRooms = ROOM_NAMES;
   }
 
-  /**
-   * Присоединить пользователя к комнате
-   */
   joinRoom(socket, userId, roomName) {
-    if (!this.isValidRoom(roomName)) {
+    if (!isValidRoom(roomName)) {
       throw new Error(`Комната "${roomName}" не существует`);
     }
 
-    // Выход из текущей комнаты
     const currentRoom = this.userRooms.get(userId);
     if (currentRoom) {
       this.leaveRoom(socket, userId);
     }
 
-    // Вход в новую комнату
     socket.join(roomName);
 
     if (!this.rooms.has(roomName)) {
@@ -31,13 +25,9 @@ class RoomManager {
     this.rooms.get(roomName).add(socket.id);
     this.userRooms.set(userId, roomName);
 
-    console.log(`✅ ${userId} joined ${roomName}`);
     return this.getRoomCounts();
   }
 
-  /**
-   * Выйти из комнаты
-   */
   leaveRoom(socket, userId) {
     const roomName = this.userRooms.get(userId);
     if (!roomName) return null;
@@ -53,21 +43,13 @@ class RoomManager {
     }
 
     this.userRooms.delete(userId);
-    console.log(`❌ ${userId} left ${roomName}`);
-
     return this.getRoomCounts();
   }
 
-  /**
-   * Получить текущую комнату пользователя
-   */
   getUserRoom(userId) {
     return this.userRooms.get(userId);
   }
 
-  /**
-   * Получить количество пользователей в каждой комнате
-   */
   getRoomCounts() {
     const counts = {};
     for (const roomName of this.validRooms) {
@@ -76,23 +58,14 @@ class RoomManager {
     return counts;
   }
 
-  /**
-   * Общее количество пользователей
-   */
   getTotalUsers() {
     return this.userRooms.size;
   }
 
-  /**
-   * Проверка существования комнаты
-   */
   isValidRoom(roomName) {
-    return this.validRooms.includes(roomName);
+    return isValidRoom(roomName);
   }
 
-  /**
-   * Получить список всех комнат
-   */
   getAvailableRooms() {
     return this.validRooms.map((name) => ({
       name,

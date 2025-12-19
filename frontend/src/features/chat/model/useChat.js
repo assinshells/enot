@@ -1,17 +1,15 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { chatApi } from "@/entities/chat/api/chatApi";
-import { useSocketEvent, useSocketConnection } from "@/shared/lib/hooks";
-import { useRooms } from "@/shared/lib/hooks/useRooms";
-import { ROOM_NAMES } from "@/shared/config/rooms";
+import { useSocketEvent } from "@/shared/lib/hooks";
 
-export const useChat = () => {
+/**
+ * Хук для управления сообщениями чата
+ */
+export const useChat = (currentRoom) => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState(null);
-
-  const isConnected = useSocketConnection();
-  const { currentRoom, ...roomsData } = useRooms();
 
   const abortControllerRef = useRef(null);
   const messageIdsRef = useRef(new Set());
@@ -123,14 +121,10 @@ export const useChat = () => {
   }, []);
 
   return {
-    currentRoom,
     messages,
     loading,
     sending,
     error,
-    isConnected,
-    availableRooms: ROOM_NAMES,
     sendMessage,
-    ...roomsData,
   };
 };

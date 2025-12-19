@@ -6,6 +6,7 @@ import { ChatInput } from "@/widgets/chat/input/ui/ChatInput";
 import { SettingsModal } from "@/widgets/modals/settings/ui/SettingsModal";
 import { useChat } from "@/features/chat/model/useChat";
 import { useAuth } from "@/shared/lib/hooks/useAuth";
+import { useRooms, useSocketConnection } from "@/shared/lib/hooks";
 import { Alert } from "@/shared/ui";
 import "./ChatPage.css";
 
@@ -27,7 +28,10 @@ ChatHeader.displayName = "ChatHeader";
 
 export const ChatPage = () => {
   const { user } = useAuth();
-  const { messages, loading, sending, error, sendMessage } = useChat();
+  const { currentRoom } = useRooms();
+  const isConnected = useSocketConnection();
+  const { messages, loading, sending, error, sendMessage } =
+    useChat(currentRoom);
 
   const [recipientValue, setRecipientValue] = useState("");
   const [messageValue, setMessageValue] = useState("");
@@ -54,9 +58,15 @@ export const ChatPage = () => {
     setTimeout(() => setRecipientValue(""), 0);
   }, []);
 
-  const handleRoomClick = useCallback(() => {
-    // Room switching handled by useChat/useRooms
-  }, []);
+  if (!isConnected) {
+    return (
+      <div className="d-flex justify-content-center align-items-center vh-100">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Подключение...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -80,7 +90,6 @@ export const ChatPage = () => {
                       loading={loading}
                       onTimeClick={handleTimeClick}
                       onNicknameClick={handleNicknameClick}
-                      onRoomClick={handleRoomClick}
                       currentUserId={user?._id}
                       currentUserNickname={user?.nickname}
                     />
@@ -96,6 +105,7 @@ export const ChatPage = () => {
             </div>
           </div>
         </div>
+
         <RightSidebarChat onUserClick={handleNicknameClick} />
 
         <SettingsModal

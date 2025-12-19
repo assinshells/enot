@@ -12,7 +12,7 @@ export const Input = ({
   helperText,
   required = false,
   disabled = false,
-  className = "form-control",
+  className = "form-control auth-input",
   ...props
 }) => {
   const inputClass = `form-control ${error ? "is-invalid" : ""} ${className}`;

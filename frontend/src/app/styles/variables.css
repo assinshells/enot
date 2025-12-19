@@ -1,15 +1,38 @@
-/*--------------------------------------------------------------
-# Font & Color Variables
---------------------------------------------------------------*/
 /* Fonts */
 :root {
   --default-font: "Arial, Helvetica, sans-serif";
 }
 
-/* Global Colors */
 :root {
-  --background-color: #fff;
-  --default-color: #000;
+  /* --- Светлая тема (Lite) --- */
+  --bg-color: #f8fafc;
+  --card-bg: #ffffff;
+  --text-color: #101010;
+  --subtext-color: #4b5563;
+  --input-bg: #f3f4f6;
+  --input-text: #111827;
+  --input-border: #d1d5db;
+  --input-focus: #2563eb;
+  --button-bg: #2563eb;
+  --button-text: #ffffff;
+  --button-hover: #1d4ed8;
+  --footer-color: #6b7280;
+}
+
+[data-theme="dark"] {
+  /* --- Тёмная тема (Dark) --- */
+  --bg-color: #0f111a;
+  --card-bg: #1f2937;
+  --text-color: #ffffff;
+  --subtext-color: #9ca3af;
+  --input-bg: #1f2937;
+  --input-text: #f9fafb;
+  --input-border: #374151;
+  --input-focus: #3b82f6;
+  --button-bg: #3b82f6;
+  --button-text: #ffffff;
+  --button-hover: #2563eb;
+  --footer-color: #6b7280;
 }
 
 /*--------------------------------------------------------------

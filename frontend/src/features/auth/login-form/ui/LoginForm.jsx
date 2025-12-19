@@ -1,20 +1,19 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/shared/lib/hooks/useAuth";
-import { useRoomForm } from "@/shared/lib/hooks/useRoomForm";
 import { useFormError } from "@/shared/lib/hooks/useFormError";
 import { useSessionStorage } from "@/shared/lib/hooks/useSessionStorage";
+import { ROOM_NAMES, DEFAULT_ROOM } from "@/shared/config/rooms";
 import { Input, Button, Alert, Card } from "@/shared/ui";
 
 export const LoginForm = () => {
   const navigate = useNavigate();
   const { loginUser } = useAuth();
-  const { selectedRoom, setSelectedRoom, availableRooms, validateRoom } =
-    useRoomForm();
   const { error, setError, clearError } = useFormError();
   const [, setCurrentRoom] = useSessionStorage("currentRoom", "");
 
   const [formData, setFormData] = useState({ nickname: "", password: "" });
+  const [selectedRoom, setSelectedRoom] = useState(DEFAULT_ROOM);
   const [loading, setLoading] = useState(false);
 
   const handleChange = useCallback((e) => {
@@ -27,9 +26,8 @@ export const LoginForm = () => {
       e.preventDefault();
       clearError();
 
-      const roomError = validateRoom();
-      if (roomError) {
-        setError(roomError);
+      if (!selectedRoom) {
+        setError("Выберите комнату");
         return;
       }
 
@@ -58,7 +56,6 @@ export const LoginForm = () => {
     [
       formData,
       selectedRoom,
-      validateRoom,
       loginUser,
       navigate,
       setError,
@@ -71,9 +68,8 @@ export const LoginForm = () => {
     <>
       <Card>
         {error && <Alert type="danger">{error}</Alert>}
-
         <form onSubmit={handleSubmit}>
-          <div className="mb-3 bg-soft-light rounded-3">
+          <div className="mb-3">
             <Input
               name="nickname"
               placeholder="Никнейм"
@@ -83,7 +79,7 @@ export const LoginForm = () => {
             />
           </div>
 
-          <div className="mb-3 bg-soft-light rounded-3">
+          <div className="mb-3">
             <Input
               type="password"
               name="password"
@@ -94,9 +90,9 @@ export const LoginForm = () => {
             />
           </div>
 
-          <div className="mb-3 bg-soft-light rounded-3">
+          <div className="mb-3">
             <select
-              className="form-select border-light bg-soft-light"
+              className="form-select auth-select"
               value={selectedRoom}
               onChange={(e) => setSelectedRoom(e.target.value)}
               required
@@ -104,7 +100,7 @@ export const LoginForm = () => {
               <option value="" disabled>
                 Выберите комнату...
               </option>
-              {availableRooms.map((room) => (
+              {ROOM_NAMES.map((room) => (
                 <option key={room} value={room}>
                   {room}
                 </option>
@@ -112,21 +108,16 @@ export const LoginForm = () => {
             </select>
           </div>
 
-          <div className="d-grid">
-            <Button type="submit" loading={loading} fullWidth>
-              Войти
-            </Button>
-          </div>
+          <Button
+            type="submit"
+            className="auth-button"
+            loading={loading}
+            fullWidth
+          >
+            Войти
+          </Button>
         </form>
       </Card>
-
-      <div className="mt-5 text-center">
-        <p>Новый пользователь? Просто введите никнейм и пароль</p>
-        <p>
-          © 2025 Chatvia. Crafted with{" "}
-          <i className="bi bi-heart-fill text-danger"></i> by Themesbrand
-        </p>
-      </div>
     </>
   );
 };

@@ -2,10 +2,79 @@
 # General Styling & Shared Classes
 --------------------------------------------------------------*/
 body {
-  font-family: var(--default-font);
-  color: var(--default-color);
-  background-color: var(--background-color);
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: "Inter", sans-serif;
 }
+
+.auth-logo {
+  font-weight: 700;
+}
+
+.auth-subtext {
+  color: var(--subtext-color);
+  font-size: 0.9rem;
+}
+
+.auth-card {
+  background-color: var(--card-bg);
+  border-radius: 1rem;
+  max-width: 400px;
+  width: 100%;
+  margin-bottom: 0.5rem; /* уменьшено с mb-4 */
+}
+
+.auth-input {
+  background-color: var(--input-bg);
+  color: var(--input-text);
+  border: 1px solid var(--input-border);
+  border-radius: 0.5rem;
+}
+
+.auth-input:focus {
+  border-color: var(--input-focus);
+  box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.25);
+}
+
+.auth-button {
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  font-weight: 600;
+}
+
+.auth-button:hover {
+  background-color: var(--button-hover);
+}
+
+.auth-footer {
+  color: var(--footer-color);
+  font-size: 0.8rem;
+  margin-top: 0.5rem; /* уменьшено с 1.5rem */
+}
+
+.auth-select {
+  background-color: var(--input-bg);
+  color: var(--input-text);
+  border: 1px solid var(--input-border);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.auth-select:focus {
+  border-color: var(--input-focus);
+  box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.25);
+  outline: none;
+}
+
+/* Поддержка темной схемы: цвет текста внутри select */
+[data-theme="dark"] .auth-select {
+  background-color: var(--input-bg);
+  color: var(--input-text);
+  border: 1px solid var(--input-border);
+}
+
 .no-caret::after {
   display: none !important;
 }
@@ -23,9 +92,9 @@ body {
   color: inherit !important;
   outline: none !important;
 }
-.form-control:focus,
+/*.form-control:focus,
 .form-select:focus {
   box-shadow: 0 0 0 1px #555;
   border-color: #777;
   outline: none;
-}
+}*/
