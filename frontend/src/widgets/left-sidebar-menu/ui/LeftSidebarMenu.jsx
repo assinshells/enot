@@ -83,10 +83,9 @@ export const LeftSidebarMenu = ({ onOpenSettings }) => {
             <li className="nav-item" title="Settings">
               <a
                 className="nav-link"
-                id="pills-settings-tab"
-                data-bs-toggle="pill"
-                href="#pills-settings"
-                role="tab"
+                href="#"
+                role="button"
+                onClick={handleSettingsClick}
               >
                 <i className="bi bi-gear"></i>
               </a>

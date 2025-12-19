@@ -1,24 +1,31 @@
 /*--------------------------------------------------------------
-# Font & Color Variables
---------------------------------------------------------------*/
-/* Fonts */
-:root {
-  --default-font: "Roboto", system-ui, -apple-system, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-}
-/* Global Colors */
-:root {
-  --background-color: #ffffff;
-  --default-color: #444444;
-  /*--bs-link-hover-decoration: underline;*/
-}
-
-/*--------------------------------------------------------------
 # General Styling & Shared Classes
 --------------------------------------------------------------*/
 body {
+  font-family: var(--default-font);
   color: var(--default-color);
   background-color: var(--background-color);
-  font-family: var(--default-font);
+}
+.no-caret::after {
+  display: none !important;
+}
+.form-select {
+  appearance: none;
+  -webkit-appearance: none; /* Chrome, Safari */
+  -moz-appearance: none; /* Firefox */
+  background-image: none;
+}
+.dropdown-item:active,
+.dropdown-item:hover,
+.dropdown-item:focus,
+.dropdown-item:focus-visible {
+  background-color: transparent !important;
+  color: inherit !important;
+  outline: none !important;
+}
+.form-control:focus,
+.form-select:focus {
+  box-shadow: 0 0 0 1px #555;
+  border-color: #777;
+  outline: none;
 }

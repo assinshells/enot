@@ -45,31 +45,29 @@ export const Modal = ({
 
   return (
     <>
-      <div className="modal-backdrop-custom" onClick={handleBackdropClick} />
-
-      <div className="modal-custom">
-        <div className="modal-dialog modal-dialog-centered">
+      <div className="modal fade show d-block" tabIndex="-1" role="dialog">
+        <div className="modal-dialog modal-dialog-centered" role="document">
           <div className="modal-content">
             {title && (
               <div className="modal-header">
                 <h5 className="modal-title">{title}</h5>
-                {onClose && (
-                  <button
-                    type="button"
-                    className="btn-close"
-                    onClick={onClose}
-                    aria-label="Close"
-                  />
-                )}
+                <button
+                  type="button"
+                  className="btn-close"
+                  aria-label="Close"
+                  onClick={onClose}
+                />
               </div>
             )}
+
             <div className="modal-body">{children}</div>
-            {footer && (
-              <div className="modal-footer border-top-0">{footer}</div>
-            )}
+
+            {footer && <div className="modal-footer">{footer}</div>}
           </div>
         </div>
       </div>
+
+      <div className="modal-backdrop fade show" onClick={onClose} />
     </>
   );
 };

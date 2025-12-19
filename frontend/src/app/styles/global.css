@@ -12,30 +12,9 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: #f0f0f0;
 }
-.no-caret::after {
-  display: none !important;
-}
-/*.form-control:focus,
-.form-select:focus {
-  box-shadow: 0 0 0 1px #555;
-  border-color: #777;
-  outline: none;
-}
+
+/*
 .form-control,
 .form-select {
   border-radius: 1;
 }*/
-.form-select {
-  appearance: none;
-  -webkit-appearance: none; /* Chrome, Safari */
-  -moz-appearance: none; /* Firefox */
-  background-image: none;
-}
-.dropdown-item:active,
-.dropdown-item:hover,
-.dropdown-item:focus,
-.dropdown-item:focus-visible {
-  background-color: transparent !important;
-  color: inherit !important;
-  outline: none !important;
-}

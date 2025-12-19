@@ -1,9 +1,10 @@
 import { useState, useCallback } from "react";
 import { LeftSidebarMenu } from "@/widgets/left-sidebar-menu/ui/LeftSidebarMenu";
-import { LeftSidebarChat } from "@/widgets/left-sidebar-chat/ui/LeftSidebarChat";
+import { RightSidebarChat } from "@/widgets/right-sidebar-chat/ui/RightSidebarChat";
 import { ChatHead } from "@/widgets/chat/head/ui/ChatHead";
 import { ChatMessages } from "@/widgets/chat/messages/ui/ChatMessages";
 import { ChatInput } from "@/widgets/chat/input/ui/ChatInput";
+import { SettingsModal } from "@/widgets/modals/settings/ui/SettingsModal";
 import { useChat } from "@/features/chat/model/useChat";
 import { useAuth } from "@/shared/lib/hooks/useAuth";
 import { Alert } from "@/shared/ui";
@@ -23,6 +24,7 @@ export const ChatPage = () => {
 
   const [recipientValue, setRecipientValue] = useState("");
   const [messageValue, setMessageValue] = useState("");
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const handleSendMessage = useCallback(
     async ({ text, recipient }) => {
@@ -56,12 +58,7 @@ export const ChatPage = () => {
     <>
       {/* start layout wrapper */}
       <div className="layout-wrapper d-lg-flex">
-        <LeftSidebarMenu />
-        <LeftSidebarChat
-          currentRoom={currentRoom}
-          onRoomChange={changeRoom}
-          onUserClick={handleNicknameClick}
-        />
+        <LeftSidebarMenu onOpenSettings={() => setSettingsOpen(true)} />
 
         {/* start user chat */}
         <div className="user-chat w-100 overflow-hidden">
@@ -99,7 +96,16 @@ export const ChatPage = () => {
             </div>
           </div>
         </div>
+        <RightSidebarChat
+          currentRoom={currentRoom}
+          onRoomChange={changeRoom}
+          onUserClick={handleNicknameClick}
+        />
         {/* end user chat */}
+        <SettingsModal
+          isOpen={settingsOpen}
+          onClose={() => setSettingsOpen(false)}
+        />
       </div>
       {/* end layout wrapper */}
     </>

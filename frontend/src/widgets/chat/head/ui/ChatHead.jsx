@@ -4,21 +4,6 @@ export const ChatHead = ({}) => {
       <div className="row align-items-center">
         <div className="col-sm-4 col-8">
           <div className="d-flex align-items-center">
-            <div className="d-block d-lg-none me-2 ms-0">
-              <a
-                href="javascript: void(0);"
-                className="user-chat-remove text-muted font-size-16 p-2"
-              >
-                <i className="ri-arrow-left-s-line"></i>
-              </a>
-            </div>
-            <div className="me-3 ms-0">
-              <img
-                src="assets/images/users/avatar-4.jpg"
-                className="rounded-circle avatar-xs"
-                alt=""
-              />
-            </div>
             <div className="flex-grow-1 overflow-hidden">
               <h5 className="font-size-16 mb-0 text-truncate">
                 <a href="#" className="text-reset user-profile-show">
@@ -42,15 +27,6 @@ export const ChatHead = ({}) => {
                 >
                   <i className="ri-search-line"></i>
                 </button>
-                <div className="dropdown-menu p-0 dropdown-menu-end dropdown-menu-md">
-                  <div className="search-box p-2">
-                    <input
-                      type="text"
-                      className="form-control bg-light border-0"
-                      placeholder="Search.."
-                    />
-                  </div>
-                </div>
               </div>
             </li>
 
