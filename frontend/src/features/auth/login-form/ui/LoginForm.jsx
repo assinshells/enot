@@ -67,56 +67,59 @@ export const LoginForm = () => {
   return (
     <>
       <Card>
-        {error && <Alert type="danger">{error}</Alert>}
-        <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <Input
-              name="nickname"
-              placeholder="Никнейм"
-              value={formData.nickname}
-              onChange={handleChange}
-              required
-            />
-          </div>
+        <div className="p-3">
+          {error && <Alert type="danger">{error}</Alert>}
+          <form onSubmit={handleSubmit}>
+            <div className="mb-3">
+              <Input
+                name="nickname"
+                placeholder="Никнейм"
+                value={formData.nickname}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-          <div className="mb-3">
-            <Input
-              type="password"
-              name="password"
-              placeholder="Пароль"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
-          </div>
+            <div className="mb-3">
+              <Input
+                type="password"
+                name="password"
+                placeholder="Пароль"
+                value={formData.password}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-          <div className="mb-3">
-            <select
-              className="form-select auth-select"
-              value={selectedRoom}
-              onChange={(e) => setSelectedRoom(e.target.value)}
-              required
-            >
-              <option value="" disabled>
-                Выберите комнату...
-              </option>
-              {ROOM_NAMES.map((room) => (
-                <option key={room} value={room}>
-                  {room}
+            <div className="mb-3">
+              <select
+                className="form-select auth-select"
+                value={selectedRoom}
+                onChange={(e) => setSelectedRoom(e.target.value)}
+                required
+              >
+                <option value="" disabled>
+                  Выберите комнату...
                 </option>
-              ))}
-            </select>
-          </div>
-
-          <Button
-            type="submit"
-            className="auth-button"
-            loading={loading}
-            fullWidth
-          >
-            Войти
-          </Button>
-        </form>
+                {ROOM_NAMES.map((room) => (
+                  <option key={room} value={room}>
+                    {room}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="d-grid">
+              <Button
+                type="submit"
+                className="auth-button"
+                loading={loading}
+                fullWidth
+              >
+                Войти
+              </Button>
+            </div>
+          </form>
+        </div>
       </Card>
     </>
   );

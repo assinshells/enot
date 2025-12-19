@@ -7,14 +7,20 @@ import { LoginForm } from "@/features/auth";
 export const LoginPage = () => {
   return (
     <>
-      <div className="d-flex flex-column justify-content-center align-items-center min-vh-100 bg-light">
-        <div className="text-center mb-4">
-          <h2 className="auth-logo mb-2">Чат Stuff</h2>
-          <p className="auth-subtext mb-3">тут щось є. начебто</p>
+      <div class="account-pages my-5 pt-sm-5">
+        <div class="container">
+          <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6 col-xl-5">
+              <div class="text-center mb-4">
+                <h2 className="auth-logo mb-2">Чат Stuff</h2>
+                <p className="auth-subtext mb-3">тут щось є. начебто</p>
+              </div>
+              <LoginForm />
+            </div>
+          </div>
         </div>
-        <LoginForm />
       </div>
-      <div className="auth-footer text-center mt-2">
+      <div className="mt-5 text-center auth-footer">
         <p>Новый пользователь? Просто введите никнейм и пароль</p>
         <p>
           © 2025 Chatvia. Crafted with{" "}
