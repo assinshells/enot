@@ -6,6 +6,9 @@ body {
   color: var(--body-text-color);
   font-family: var(--body-font-family);
 }
+a {
+  text-decoration: none;
+}
 
 .auth-logo {
   font-weight: 700;
@@ -16,11 +19,9 @@ body {
   font-size: 0.9rem;
 }
 
-.auth-card {
+.card {
   background-color: var(--card-bg);
-  border-radius: 1rem;
-  max-width: 400px;
-  width: 100%;
+  border: 1px solid var(--input-border);
 }
 
 .auth-input {
@@ -67,9 +68,10 @@ body {
   color: inherit !important;
   outline: none !important;
 }
-/*.form-control:focus,
-.form-select:focus {
-  box-shadow: 0 0 0 1px #555;
-  border-color: #777;
-  outline: none;
+/*.btn-primary {
+  --bs-btn-bg: #ff5722;
+  --bs-btn-border-color: #ff5722;
+  --bs-btn-hover-bg: #e64a19;
+  --bs-btn-hover-border-color: #e64a19;
+  --bs-btn-active-bg: #d84315;
 }*/
