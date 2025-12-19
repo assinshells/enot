@@ -1,10 +1,5 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 
-/**
- * Хук для безопасной работы с sessionStorage
- * @param {string} key - Ключ хранилища
- * @param {*} initialValue - Начальное значение
- */
 export const useSessionStorage = (key, initialValue) => {
   const [storedValue, setStoredValue] = useState(() => {
     try {

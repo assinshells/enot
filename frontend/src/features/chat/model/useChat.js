@@ -1,27 +1,18 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { chatApi } from "@/entities/chat/api/chatApi";
-import {
-  useSocketEvent,
-  useSocketConnection,
-  useSocketEmit,
-} from "@/shared/lib/hooks/useSocket";
-import { useSessionStorage } from "@/shared/lib/hooks/useSessionStorage";
-import { ROOM_NAMES, DEFAULT_ROOM } from "@/shared/config/rooms";
+import { useSocketEvent, useSocketConnection } from "@/shared/lib/hooks";
+import { useRooms } from "@/shared/lib/hooks/useRooms";
+import { ROOM_NAMES } from "@/shared/config/rooms";
 
 export const useChat = () => {
-  const [currentRoom, setCurrentRoom] = useSessionStorage(
-    "currentRoom",
-    DEFAULT_ROOM
-  );
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState(null);
-  const [rooms, setRooms] = useState([]);
-  const [counts, setCounts] = useState({});
 
   const isConnected = useSocketConnection();
-  const emit = useSocketEmit();
+  const { currentRoom, ...roomsData } = useRooms();
+
   const abortControllerRef = useRef(null);
   const messageIdsRef = useRef(new Set());
 
@@ -63,25 +54,6 @@ export const useChat = () => {
     }
   }, []);
 
-  const changeRoom = useCallback(
-    (newRoom) => {
-      if (newRoom === currentRoom || !ROOM_NAMES.includes(newRoom)) {
-        return;
-      }
-
-      setLoading(true);
-      setMessages([]);
-      messageIdsRef.current.clear();
-      emit("room:leave");
-
-      setTimeout(() => {
-        setCurrentRoom(newRoom);
-        emit("room:join", { room: newRoom });
-      }, 50);
-    },
-    [currentRoom, emit, setCurrentRoom]
-  );
-
   const sendMessage = useCallback(
     async (text, recipient = null) => {
       const trimmedText = text.trim();
@@ -112,25 +84,12 @@ export const useChat = () => {
   useSocketEvent(
     "room:joined",
     useCallback(
-      ({ room, counts: newCounts }) => {
-        setCounts(newCounts);
+      ({ room }) => {
         loadMessages(room);
       },
       [loadMessages]
     )
   );
-
-  useSocketEvent(
-    "room:list",
-    useCallback((data) => {
-      setRooms(data);
-      const newCounts = {};
-      data.forEach((r) => (newCounts[r.name] = r.count));
-      setCounts(newCounts);
-    }, [])
-  );
-
-  useSocketEvent("room:counts", setCounts);
 
   useSocketEvent(
     "message:new",
@@ -156,12 +115,6 @@ export const useChat = () => {
   );
 
   useEffect(() => {
-    if (isConnected && ROOM_NAMES.includes(currentRoom)) {
-      emit("room:join", { room: currentRoom });
-    }
-  }, [isConnected, currentRoom, emit]);
-
-  useEffect(() => {
     return () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
@@ -176,10 +129,8 @@ export const useChat = () => {
     sending,
     error,
     isConnected,
-    rooms,
-    counts,
     availableRooms: ROOM_NAMES,
     sendMessage,
-    changeRoom,
+    ...roomsData,
   };
 };

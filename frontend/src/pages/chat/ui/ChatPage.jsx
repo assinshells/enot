@@ -1,7 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, memo } from "react";
 import { LeftSidebarMenu } from "@/widgets/left-sidebar-menu/ui/LeftSidebarMenu";
 import { RightSidebarChat } from "@/widgets/right-sidebar-chat/ui/RightSidebarChat";
-import { ChatHead } from "@/widgets/chat/head/ui/ChatHead";
 import { ChatMessages } from "@/widgets/chat/messages/ui/ChatMessages";
 import { ChatInput } from "@/widgets/chat/input/ui/ChatInput";
 import { SettingsModal } from "@/widgets/modals/settings/ui/SettingsModal";
@@ -10,17 +9,25 @@ import { useAuth } from "@/shared/lib/hooks/useAuth";
 import { Alert } from "@/shared/ui";
 import "./ChatPage.css";
 
+const ChatHeader = memo(() => (
+  <div className="p-3 p-lg-4 border-bottom user-chat-topbar">
+    <div className="row align-items-center">
+      <div className="col-sm-4 col-8">
+        <div className="d-flex align-items-center">
+          <div className="flex-grow-1 overflow-hidden">
+            <h5 className="font-size-16 mb-0 text-truncate">Chat</h5>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+));
+
+ChatHeader.displayName = "ChatHeader";
+
 export const ChatPage = () => {
   const { user } = useAuth();
-  const {
-    currentRoom,
-    messages,
-    loading,
-    sending,
-    error,
-    sendMessage,
-    changeRoom,
-  } = useChat();
+  const { messages, loading, sending, error, sendMessage } = useChat();
 
   const [recipientValue, setRecipientValue] = useState("");
   const [messageValue, setMessageValue] = useState("");
@@ -47,31 +54,24 @@ export const ChatPage = () => {
     setTimeout(() => setRecipientValue(""), 0);
   }, []);
 
-  const handleRoomClick = useCallback(
-    (roomName) => {
-      changeRoom(roomName);
-    },
-    [changeRoom]
-  );
+  const handleRoomClick = useCallback(() => {
+    // Room switching handled by useChat/useRooms
+  }, []);
 
   return (
     <>
-      {/* start layout wrapper */}
       <div className="layout-wrapper d-lg-flex">
         <LeftSidebarMenu onOpenSettings={() => setSettingsOpen(true)} />
 
-        {/* start user chat */}
         <div className="user-chat w-100 overflow-hidden">
           <div className="d-lg-flex">
             <div className="w-100 overflow-hidden position-relative">
               {error && (
                 <div className="p-3">
-                  <Alert type="danger" onClose={() => {}}>
-                    {error}
-                  </Alert>
+                  <Alert type="danger">{error}</Alert>
                 </div>
               )}
-              <ChatHead />
+              <ChatHeader />
               <div className="d-flex flex-grow-1 overflow-hidden">
                 <div className="flex-grow-1 d-flex flex-column overflow-hidden">
                   <div className="flex-grow-1 overflow-auto">
@@ -96,18 +96,13 @@ export const ChatPage = () => {
             </div>
           </div>
         </div>
-        <RightSidebarChat
-          currentRoom={currentRoom}
-          onRoomChange={changeRoom}
-          onUserClick={handleNicknameClick}
-        />
-        {/* end user chat */}
+        <RightSidebarChat onUserClick={handleNicknameClick} />
+
         <SettingsModal
           isOpen={settingsOpen}
           onClose={() => setSettingsOpen(false)}
         />
       </div>
-      {/* end layout wrapper */}
     </>
   );
 };

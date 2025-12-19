@@ -23,16 +23,11 @@ const SystemMessageItem = memo(
       onRoomClick
     );
 
-    const handleTimeClick = () => {
-      const timeText = formatTime(message.createdAt);
-      onTimeClick(timeText);
-    };
-
     return (
       <li>
         <span
           className="message-time clickable me-2"
-          onClick={handleTimeClick}
+          onClick={() => onTimeClick(formatTime(message.createdAt))}
           style={{ color: TIME_COLOR, cursor: "pointer", fontSize: "0.85em" }}
         >
           {formatTime(message.createdAt)}
@@ -76,29 +71,18 @@ const MessageItem = memo(
       : getColorValue(message.userColor);
     const messageColor = getColorValue(message.userColor);
 
-    const handleTimeClick = () => {
-      const timeText = formatTime(message.createdAt);
-      onTimeClick(timeText);
-    };
-
-    const handleSenderClick = () => {
-      if (!isMyMessage) {
-        onNicknameClick(message.nickname);
-      }
-    };
-
     return (
       <li className="message-item">
         <span
           className="message-time clickable"
-          onClick={handleTimeClick}
+          onClick={() => onTimeClick(formatTime(message.createdAt))}
           style={{ color: TIME_COLOR, cursor: "pointer" }}
         >
           {formatTime(message.createdAt)}
         </span>{" "}
         <span
           className={`message-sender ${!isMyMessage ? "clickable" : ""}`}
-          onClick={handleSenderClick}
+          onClick={() => !isMyMessage && onNicknameClick(message.nickname)}
           style={{
             color: senderColor,
             cursor: isMyMessage ? "default" : "pointer",
@@ -166,36 +150,32 @@ export const ChatMessages = memo(
     if (!messages || messages.length === 0) return <EmptyState />;
 
     return (
-      <>
-        {/* start chat conversation section */}
-        <div class="chat-conversation p-3 p-lg-4">
-          <ul className="list-unstyled mb-0">
-            {messages.map((message) =>
-              message.type === SYSTEM_MESSAGE_TYPE ? (
-                <SystemMessageItem
-                  key={message._id}
-                  message={message}
-                  onTimeClick={onTimeClick}
-                  onNicknameClick={onNicknameClick}
-                  onRoomClick={onRoomClick}
-                  currentUserNickname={currentUserNickname}
-                />
-              ) : (
-                <MessageItem
-                  key={message._id}
-                  message={message}
-                  onTimeClick={onTimeClick}
-                  onNicknameClick={onNicknameClick}
-                  currentUserId={currentUserId}
-                  currentUserNickname={currentUserNickname}
-                />
-              )
-            )}
-          </ul>
-          <div ref={messagesEndRef} />
-        </div>
-        {/* end chat conversation section */}
-      </>
+      <div className="chat-conversation p-3 p-lg-4">
+        <ul className="list-unstyled mb-0">
+          {messages.map((message) =>
+            message.type === SYSTEM_MESSAGE_TYPE ? (
+              <SystemMessageItem
+                key={message._id}
+                message={message}
+                onTimeClick={onTimeClick}
+                onNicknameClick={onNicknameClick}
+                onRoomClick={onRoomClick}
+                currentUserNickname={currentUserNickname}
+              />
+            ) : (
+              <MessageItem
+                key={message._id}
+                message={message}
+                onTimeClick={onTimeClick}
+                onNicknameClick={onNicknameClick}
+                currentUserId={currentUserId}
+                currentUserNickname={currentUserNickname}
+              />
+            )
+          )}
+        </ul>
+        <div ref={messagesEndRef} />
+      </div>
     );
   }
 );

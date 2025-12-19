@@ -1,13 +1,8 @@
-/**
- * Shared Hook: Gender Filter Logic
- * Новый хук для управления фильтрацией по полу
- */
 import { useState, useMemo, useEffect } from "react";
 
 export const useGenderFilter = (users, currentUserGender) => {
   const [activeFilter, setActiveFilter] = useState("all");
 
-  // Устанавливаем фильтр по умолчанию на основе пола текущего пользователя
   useEffect(() => {
     if (!currentUserGender) return;
 
@@ -30,11 +25,7 @@ export const useGenderFilter = (users, currentUserGender) => {
 
   const filteredUsers = useMemo(() => {
     if (activeFilter === "all") return users;
-    const filtered = users.filter((u) => u.gender === activeFilter);
-    console.log(
-      `🔍 Filter: ${activeFilter}, Total: ${users.length}, Filtered: ${filtered.length}`
-    );
-    return filtered;
+    return users.filter((u) => u.gender === activeFilter);
   }, [users, activeFilter]);
 
   return {
