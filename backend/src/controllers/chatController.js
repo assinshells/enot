@@ -1,4 +1,8 @@
-import Message from "../models/messageModel.js";
+/**
+ * Chat Controller - Відрефакторений
+ * Використовує messageService для бізнес-логіки
+ */
+import messageService from "../services/messageService.js";
 import { sendMessageToRoom } from "../services/socketService.js";
 import roomManager from "../services/roomManager.js";
 import logger from "../config/logger.js";
@@ -14,21 +18,13 @@ export const getMessages = async (req, res, next) => {
       });
     }
 
-    const messages = await Message.find({ room })
-      .sort({ createdAt: -1 })
-      .limit(50)
-      .lean()
-      .select("-__v");
+    const messages = await messageService.getRoomMessages(room);
 
-    const orderedMessages = messages.reverse();
-
-    logger.info(
-      `Получено ${orderedMessages.length} сообщений для комнаты "${room}"`
-    );
+    logger.info(`Получено ${messages.length} сообщений для комнаты "${room}"`);
 
     res.json({
       success: true,
-      data: orderedMessages,
+      data: messages,
     });
   } catch (error) {
     next(error);
@@ -39,27 +35,25 @@ export const createMessage = async (req, res, next) => {
   try {
     const { text, room, recipient } = req.body;
 
-    if (!text || !text.trim()) {
+    // Валідація
+    const validationErrors = messageService.validateMessageData(text, room);
+    if (validationErrors) {
       return res.status(400).json({
         success: false,
-        message: "Текст сообщения обязателен",
+        message: validationErrors[0],
+        errors: validationErrors,
       });
     }
 
-    if (text.trim().length > 1000) {
-      return res.status(400).json({
-        success: false,
-        message: "Сообщение слишком длинное (макс. 1000 символов)",
-      });
-    }
-
-    if (!room || !roomManager.isValidRoom(room)) {
+    // Перевірка кімнати
+    if (!roomManager.isValidRoom(room)) {
       return res.status(400).json({
         success: false,
         message: "Укажите корректную комнату",
       });
     }
 
+    // Перевірка, чи користувач в цій кімнаті
     const userRoom = roomManager.getUserRoom(req.user._id.toString());
     if (userRoom !== room) {
       return res.status(403).json({
@@ -68,27 +62,15 @@ export const createMessage = async (req, res, next) => {
       });
     }
 
-    const messageData = {
-      user: req.user._id,
-      nickname: req.user.nickname,
-      userColor: req.user.color || "black",
+    // Створення повідомлення
+    const message = await messageService.createUserMessage({
+      user: req.user,
+      text,
       room,
-      text: text.trim(),
-    };
+      recipient,
+    });
 
-    // Добавляем получателя, если указан
-    if (recipient && recipient.trim()) {
-      messageData.recipient = recipient.trim();
-    }
-
-    const message = await Message.create(messageData);
-
-    logger.info(
-      `Сообщение создано: ${message._id} в комнате "${room}"${
-        message.recipient ? ` для ${message.recipient}` : ""
-      }`
-    );
-
+    // Відправка через Socket.IO
     sendMessageToRoom(room, "message:new", {
       _id: message._id,
       user: message.user,
